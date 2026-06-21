@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Goal, goalService } from '../../lib/db'
+import { Goal, goalService, taskService } from '../../lib/db'
 import { format, differenceInDays } from 'date-fns'
 
 interface GoalTreeNodeProps {
@@ -28,25 +28,32 @@ export default function GoalTreeNode({
   level
 }: GoalTreeNodeProps) {
   const [showMenu, setShowMenu] = useState(false)
+  const [showAddChild, setShowAddChild] = useState(false)
+  const [showAddTask, setShowAddTask] = useState(false)
+  const [childTitle, setChildTitle] = useState('')
+  const [childDescription, setChildDescription] = useState('')
+  const [childPriority, setChildPriority] = useState<'high' | 'medium' | 'low'>('medium')
+  const [childStartDate, setChildStartDate] = useState('')
+  const [childTargetDate, setChildTargetDate] = useState('')
+  const [taskTitle, setTaskTitle] = useState('')
+  const [taskStartDate, setTaskStartDate] = useState('')
+  const [taskDueDate, setTaskDueDate] = useState('')
+
   const children = getChildren(goal.id!)
   const hasChildren = children.length > 0
   const isExpanded = expandedIds.has(goal.id!)
 
-  // 计算倒计时（只比较日期，忽略时间）
   const getDaysRemaining = () => {
     if (!goal.target_date) return null
     const target = new Date(goal.target_date)
     const today = new Date()
-    // 只取年月日，忽略时间
     const targetDateOnly = new Date(target.getFullYear(), target.getMonth(), target.getDate())
     const todayDateOnly = new Date(today.getFullYear(), today.getMonth(), today.getDate())
-    const days = differenceInDays(targetDateOnly, todayDateOnly)
-    return days
+    return differenceInDays(targetDateOnly, todayDateOnly)
   }
 
   const daysRemaining = getDaysRemaining()
 
-  // 获取优先级颜色
   const getPriorityColor = () => {
     switch (goal.priority) {
       case 'high': return 'bg-red-500'
@@ -56,7 +63,6 @@ export default function GoalTreeNode({
     }
   }
 
-  // 获取状态样式
   const getStatusStyle = () => {
     if (goal.status === 'completed') {
       return 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800'
@@ -69,39 +75,62 @@ export default function GoalTreeNode({
 
   // 添加子目标
   const handleAddChild = async () => {
-    const title = prompt('输入子目标标题:')
-    if (!title) return
-
+    if (!childTitle.trim()) return
     try {
       await goalService.create({
-        title,
-        description: '',
+        title: childTitle.trim(),
+        description: childDescription.trim(),
         status: 'pending',
-        priority: 'medium',
+        priority: childPriority,
         is_key_goal: false,
         tags: [],
         folder_id: goal.folder_id || null,
         parent_id: goal.id || null,
-        start_date: null,
+        start_date: childStartDate ? new Date(childStartDate).toISOString() : null,
         order_index: children.length,
         time_spent: 0,
         reminder_at: null,
         is_deleted: false,
         deleted_at: null,
         repeat_rule: null,
-        target_date: null,
+        target_date: childTargetDate ? new Date(childTargetDate).toISOString() : null,
         completed_at: null
       })
+      setChildTitle('')
+      setChildDescription('')
+      setChildPriority('medium')
+      setChildStartDate('')
+      setChildTargetDate('')
+      setShowAddChild(false)
       onRefresh()
-      if (!isExpanded) {
-        onToggleExpand(goal.id!)
-      }
+      if (!isExpanded) onToggleExpand(goal.id!)
     } catch (error) {
       console.error('添加子目标失败:', error)
     }
   }
 
-  // 切换重点状态
+  // 添加任务
+  const handleAddTask = async () => {
+    if (!taskTitle.trim()) return
+    try {
+      await taskService.create({
+        goal_id: goal.id!,
+        title: taskTitle.trim(),
+        status: 'pending',
+        start_date: taskStartDate ? new Date(taskStartDate).toISOString() : null,
+        due_date: taskDueDate ? new Date(taskDueDate).toISOString() : null,
+        order_index: 0
+      })
+      setTaskTitle('')
+      setTaskStartDate('')
+      setTaskDueDate('')
+      setShowAddTask(false)
+      onRefresh()
+    } catch (error) {
+      console.error('添加任务失败:', error)
+    }
+  }
+
   const handleToggleKeyGoal = async () => {
     try {
       await goalService.update(goal.id!, { is_key_goal: !goal.is_key_goal })
@@ -111,7 +140,6 @@ export default function GoalTreeNode({
     }
   }
 
-  // 删除目标
   const handleDelete = async () => {
     if (!confirm('确定要删除这个目标吗？')) return
     try {
@@ -129,13 +157,9 @@ export default function GoalTreeNode({
         onClick={() => onSelect(goal)}
       >
         <div className="flex items-start gap-3">
-          {/* 展开/折叠按钮 */}
           {hasChildren ? (
             <button
-              onClick={(e) => {
-                e.stopPropagation()
-                onToggleExpand(goal.id!)
-              }}
+              onClick={(e) => { e.stopPropagation(); onToggleExpand(goal.id!) }}
               className="mt-1 w-5 h-5 flex items-center justify-center text-gray-500 hover:text-gray-700"
             >
               {isExpanded ? '▼' : '▶'}
@@ -144,15 +168,11 @@ export default function GoalTreeNode({
             <div className="w-5" />
           )}
 
-          {/* 复选框 */}
           <button
             onClick={(e) => {
               e.stopPropagation()
-              if (goal.status === 'completed') {
-                onUndoComplete(goal.id!)
-              } else {
-                onComplete(goal.id!)
-              }
+              if (goal.status === 'completed') onUndoComplete(goal.id!)
+              else onComplete(goal.id!)
             }}
             className={`mt-1 w-5 h-5 rounded border-2 flex items-center justify-center ${
               goal.status === 'completed'
@@ -160,18 +180,12 @@ export default function GoalTreeNode({
                 : 'border-gray-300 dark:border-gray-600 hover:border-blue-500'
             }`}
           >
-            {goal.status === 'completed' && (
-              <span className="text-white text-xs">✓</span>
-            )}
+            {goal.status === 'completed' && <span className="text-white text-xs">✓</span>}
           </button>
 
-          {/* 内容 */}
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2">
-              {/* 优先级标记 */}
               <div className={`w-2 h-2 rounded-full ${getPriorityColor()}`} />
-
-              {/* 标题 */}
               <h4 className={`font-medium ${
                 goal.status === 'completed'
                   ? 'text-green-600 dark:text-green-400 line-through'
@@ -179,103 +193,65 @@ export default function GoalTreeNode({
               }`}>
                 {goal.title}
               </h4>
-
-              {/* 重点标记 */}
-              {goal.is_key_goal && (
-                <span className="text-yellow-500">⭐</span>
-              )}
+              {goal.is_key_goal && <span className="text-yellow-500">⭐</span>}
             </div>
 
-            {/* 描述预览 */}
             {goal.description && (
-              <p className="text-sm text-gray-500 mt-1 line-clamp-1">
-                {goal.description}
-              </p>
+              <p className="text-sm text-gray-500 mt-1 line-clamp-1">{goal.description}</p>
             )}
 
-            {/* 底部信息 */}
             <div className="flex items-center gap-4 mt-2 text-xs text-gray-400">
-              {/* 倒计时 */}
               {daysRemaining !== null && goal.status !== 'completed' && (
                 <span className={`${
-                  daysRemaining < 0
-                    ? 'text-red-500'
-                    : daysRemaining <= 3
-                    ? 'text-yellow-500'
-                    : 'text-gray-500'
+                  daysRemaining < 0 ? 'text-red-500' : daysRemaining <= 3 ? 'text-yellow-500' : 'text-gray-500'
                 }`}>
-                  {daysRemaining < 0
-                    ? `已超期 ${Math.abs(daysRemaining)} 天`
-                    : daysRemaining === 0
-                    ? '今天截止'
-                    : `剩余 ${daysRemaining} 天`}
+                  {daysRemaining < 0 ? `已超期 ${Math.abs(daysRemaining)} 天` : daysRemaining === 0 ? '今天截止' : `剩余 ${daysRemaining} 天`}
                 </span>
               )}
-
-              {/* 子目标数量 */}
-              {hasChildren && (
-                <span>{children.length} 个子目标</span>
-              )}
-
-              {/* 标签 */}
+              {hasChildren && <span>{children.length} 个子目标</span>}
               {goal.tags && goal.tags.length > 0 && (
                 <div className="flex gap-1">
                   {goal.tags.slice(0, 2).map((tag, i) => (
-                    <span key={i} className="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-600 rounded">
-                      {tag}
-                    </span>
+                    <span key={i} className="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-600 rounded">{tag}</span>
                   ))}
-                  {goal.tags.length > 2 && (
-                    <span>+{goal.tags.length - 2}</span>
-                  )}
                 </div>
               )}
             </div>
           </div>
 
-          {/* 操作按钮 */}
           <div className="relative">
             <button
-              onClick={(e) => {
-                e.stopPropagation()
-                setShowMenu(!showMenu)
-              }}
+              onClick={(e) => { e.stopPropagation(); setShowMenu(!showMenu) }}
               className="p-1 hover:bg-gray-100 dark:hover:bg-gray-600 rounded"
             >
               ⋮
             </button>
 
             {showMenu && (
-              <div className="absolute right-0 top-full mt-1 w-32 bg-white dark:bg-gray-700 rounded-lg shadow-lg border border-gray-200 dark:border-gray-600 z-10">
+              <div className="absolute right-0 top-full mt-1 w-36 bg-white dark:bg-gray-700 rounded-lg shadow-lg border border-gray-200 dark:border-gray-600 z-10">
                 <button
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    handleAddChild()
-                    setShowMenu(false)
-                  }}
+                  onClick={(e) => { e.stopPropagation(); setShowAddChild(true); setShowMenu(false) }}
                   className="w-full px-3 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-600 rounded-t-lg"
                 >
-                  添加子目标
+                  ➕ 添加子目标
                 </button>
                 <button
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    handleToggleKeyGoal()
-                    setShowMenu(false)
-                  }}
+                  onClick={(e) => { e.stopPropagation(); setShowAddTask(true); setShowMenu(false) }}
                   className="w-full px-3 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-600"
                 >
-                  {goal.is_key_goal ? '取消重点' : '设为重点'}
+                  📝 添加任务
                 </button>
                 <button
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    handleDelete()
-                    setShowMenu(false)
-                  }}
+                  onClick={(e) => { e.stopPropagation(); handleToggleKeyGoal(); setShowMenu(false) }}
+                  className="w-full px-3 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-600"
+                >
+                  {goal.is_key_goal ? '⭐ 取消重点' : '☆ 设为重点'}
+                </button>
+                <button
+                  onClick={(e) => { e.stopPropagation(); handleDelete(); setShowMenu(false) }}
                   className="w-full px-3 py-2 text-left text-sm text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-b-lg"
                 >
-                  删除
+                  🗑️ 删除
                 </button>
               </div>
             )}
@@ -301,6 +277,94 @@ export default function GoalTreeNode({
               level={level + 1}
             />
           ))}
+        </div>
+      )}
+
+      {/* 添加子目标弹窗 */}
+      {showAddChild && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={() => setShowAddChild(false)}>
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-md" onClick={e => e.stopPropagation()}>
+            <div className="p-6">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">添加子目标</h3>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">标题 *</label>
+                  <input type="text" value={childTitle} onChange={e => setChildTitle(e.target.value)}
+                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white"
+                    autoFocus onKeyDown={e => e.key === 'Enter' && handleAddChild()} />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">描述</label>
+                  <textarea value={childDescription} onChange={e => setChildDescription(e.target.value)} rows={2}
+                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">优先级</label>
+                  <select value={childPriority} onChange={e => setChildPriority(e.target.value as any)}
+                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white">
+                    <option value="high">高</option>
+                    <option value="medium">中</option>
+                    <option value="low">低</option>
+                  </select>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">开始日期</label>
+                    <input type="date" value={childStartDate} onChange={e => setChildStartDate(e.target.value)}
+                      className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">截止日期</label>
+                    <input type="date" value={childTargetDate} onChange={e => setChildTargetDate(e.target.value)}
+                      className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white" />
+                  </div>
+                </div>
+                <div className="flex gap-3 pt-2">
+                  <button onClick={() => setShowAddChild(false)}
+                    className="flex-1 py-2 px-4 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700">取消</button>
+                  <button onClick={handleAddChild}
+                    className="flex-1 py-2 px-4 bg-blue-500 text-white rounded-lg hover:bg-blue-600">添加</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 添加任务弹窗 */}
+      {showAddTask && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={() => setShowAddTask(false)}>
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-md" onClick={e => e.stopPropagation()}>
+            <div className="p-6">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">添加任务</h3>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">任务标题 *</label>
+                  <input type="text" value={taskTitle} onChange={e => setTaskTitle(e.target.value)}
+                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white"
+                    autoFocus onKeyDown={e => e.key === 'Enter' && handleAddTask()} />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">开始日期</label>
+                    <input type="date" value={taskStartDate} onChange={e => setTaskStartDate(e.target.value)}
+                      className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">截止日期</label>
+                    <input type="date" value={taskDueDate} onChange={e => setTaskDueDate(e.target.value)}
+                      className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white" />
+                  </div>
+                </div>
+                <div className="flex gap-3 pt-2">
+                  <button onClick={() => setShowAddTask(false)}
+                    className="flex-1 py-2 px-4 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700">取消</button>
+                  <button onClick={handleAddTask}
+                    className="flex-1 py-2 px-4 bg-blue-500 text-white rounded-lg hover:bg-blue-600">添加</button>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       )}
     </div>
