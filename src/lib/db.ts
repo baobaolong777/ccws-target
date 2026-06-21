@@ -9,6 +9,7 @@ export interface Goal {
   status: 'pending' | 'in_progress' | 'completed' | 'cancelled'
   priority: 'high' | 'medium' | 'low'
   is_key_goal: boolean
+  is_daily: boolean
   tags: string[]
   folder_id: string | null
   created_at: string

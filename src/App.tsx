@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import { supabase } from './lib/supabase'
 import AuthForm from './components/Auth/AuthForm'
 import HomePage from './pages/HomePage'
@@ -12,6 +12,7 @@ import Layout from './components/Layout'
 function App() {
   const [user, setUser] = useState<any>(null)
   const [loading, setLoading] = useState(true)
+  const [showNewGoal, setShowNewGoal] = useState(false)
 
   useEffect(() => {
     // 获取初始会话
@@ -52,17 +53,35 @@ function App() {
 
   return (
     <Router>
-      <Layout>
-        <Routes>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/calendar" element={<CalendarPage />} />
-          <Route path="/stats" element={<StatsPage />} />
-          <Route path="/trash" element={<TrashPage />} />
-          <Route path="/profile" element={<ProfilePage />} />
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-      </Layout>
+      <AppContent showNewGoal={showNewGoal} setShowNewGoal={setShowNewGoal} />
     </Router>
+  )
+}
+
+function AppContent({ showNewGoal, setShowNewGoal }: { showNewGoal: boolean; setShowNewGoal: (v: boolean) => void }) {
+  const location = useLocation()
+  const isHomePage = location.pathname === '/'
+
+  return (
+    <Layout headerExtra={
+      isHomePage ? (
+        <button
+          onClick={() => setShowNewGoal(true)}
+          className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors text-sm"
+        >
+          + 新建
+        </button>
+      ) : undefined
+    }>
+      <Routes>
+        <Route path="/" element={<HomePage showNewGoal={showNewGoal} setShowNewGoal={setShowNewGoal} />} />
+        <Route path="/calendar" element={<CalendarPage />} />
+        <Route path="/stats" element={<StatsPage />} />
+        <Route path="/trash" element={<TrashPage />} />
+        <Route path="/profile" element={<ProfilePage />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </Layout>
   )
 }
 

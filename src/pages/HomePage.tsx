@@ -4,8 +4,9 @@ import KeyGoalsPanel from '../components/KeyGoals/KeyGoalsPanel'
 import GoalTree from '../components/GoalTree/GoalTree'
 import GoalDetail from '../components/GoalDetail/GoalDetail'
 import FolderList from '../components/Folder/FolderList'
+import DailyGoals from '../components/DailyGoals/DailyGoals'
 
-export default function HomePage() {
+export default function HomePage({ showNewGoal, setShowNewGoal }: { showNewGoal: boolean; setShowNewGoal: (v: boolean) => void }) {
   const [allGoals, setAllGoals] = useState<Goal[]>([])
   const [goals, setGoals] = useState<Goal[]>([])
   const [keyGoals, setKeyGoals] = useState<Goal[]>([])
@@ -15,7 +16,6 @@ export default function HomePage() {
   const [selectedFolderId, setSelectedFolderId] = useState<string | null>(null)
   const [searchKeyword, setSearchKeyword] = useState('')
   const [loading, setLoading] = useState(true)
-  const [showNewGoal, setShowNewGoal] = useState(false)
 
   // 加载数据
   useEffect(() => {
@@ -68,6 +68,7 @@ export default function HomePage() {
         status: goalData.status || 'pending',
         priority: goalData.priority || 'medium',
         is_key_goal: goalData.is_key_goal || false,
+        is_daily: goalData.is_daily || false,
         tags: goalData.tags || [],
         folder_id: goalData.folder_id || null,
         parent_id: goalData.parent_id || null,
@@ -181,29 +182,8 @@ export default function HomePage() {
 
   return (
     <div className="space-y-6">
-      {/* 搜索栏 */}
-      <div className="flex gap-2">
-        <input
-          type="text"
-          placeholder="搜索目标..."
-          value={searchKeyword}
-          onChange={(e) => setSearchKeyword(e.target.value)}
-          onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-          className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
-        />
-        <button
-          onClick={handleSearch}
-          className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
-        >
-          搜索
-        </button>
-        <button
-          onClick={() => setShowNewGoal(true)}
-          className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
-        >
-          + 新建
-        </button>
-      </div>
+      {/* 每日目标 - 最上面 */}
+      <DailyGoals onComplete={handleCompleteGoal} onUndoComplete={handleUndoComplete} />
 
       {/* 重点目标 */}
       <KeyGoalsPanel
@@ -218,6 +198,24 @@ export default function HomePage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* 左侧：文件夹和目标树 */}
         <div className="lg:col-span-2 space-y-6">
+          {/* 搜索栏 */}
+          <div className="flex gap-2">
+            <input
+              type="text"
+              placeholder="搜索目标..."
+              value={searchKeyword}
+              onChange={(e) => setSearchKeyword(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+              className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
+            />
+            <button
+              onClick={handleSearch}
+              className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+            >
+              搜索
+            </button>
+          </div>
+
           {/* 文件夹列表 */}
           <FolderList
             folders={folders}
@@ -226,7 +224,7 @@ export default function HomePage() {
             selectedFolderId={selectedFolderId}
           />
 
-          {/* 目标树 */}
+          {/* 目标树 - 全部目标 */}
           <GoalTree
             goals={filteredGoals}
             onComplete={handleCompleteGoal}
@@ -279,6 +277,7 @@ function NewGoalModal({ folders, onSubmit, onClose }: {
   const [targetDate, setTargetDate] = useState('')
   const [folderId, setFolderId] = useState<string | null>(null)
   const [isKeyGoal, setIsKeyGoal] = useState(false)
+  const [isDaily, setIsDaily] = useState(false)
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -289,7 +288,8 @@ function NewGoalModal({ folders, onSubmit, onClose }: {
       start_date: startDate || null,
       target_date: targetDate || null,
       folder_id: folderId,
-      is_key_goal: isKeyGoal
+      is_key_goal: isKeyGoal,
+      is_daily: isDaily
     })
   }
 
@@ -396,6 +396,19 @@ function NewGoalModal({ folders, onSubmit, onClose }: {
               />
               <label htmlFor="isKeyGoal" className="text-sm text-gray-700 dark:text-gray-300">
                 设为重点目标
+              </label>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                id="isDaily"
+                checked={isDaily}
+                onChange={(e) => setIsDaily(e.target.checked)}
+                className="w-4 h-4 text-orange-500 border-gray-300 rounded focus:ring-orange-500"
+              />
+              <label htmlFor="isDaily" className="text-sm text-gray-700 dark:text-gray-300">
+                设为每日目标
               </label>
             </div>
 

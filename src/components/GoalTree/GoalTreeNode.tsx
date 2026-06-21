@@ -138,6 +138,7 @@ export default function GoalTreeNode({
         status: 'pending',
         priority: childPriority,
         is_key_goal: false,
+        is_daily: false,
         tags: [],
         folder_id: goal.folder_id || null,
         parent_id: goal.id || null,

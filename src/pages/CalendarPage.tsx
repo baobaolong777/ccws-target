@@ -46,11 +46,16 @@ export default function CalendarPage() {
     ? eachDayOfInterval({ start: startOfWeek(currentMonth, { weekStartsOn: 0 }), end: endOfWeek(currentMonth, { weekStartsOn: 0 }) })
     : monthDays
 
-  // Get items for a specific date (goals in range + tasks in range)
+  // Get items for a specific date (goals in range + tasks in range + daily goals)
   const getItemsForDate = (date: Date) => {
     const dateStr = format(date, 'yyyy-MM-dd')
     const goalsForDate = goals.filter(goal => {
       if (goal.status === 'cancelled' || goal.is_deleted) return false
+      // Daily goals: show on the day they were created
+      if (goal.is_daily) {
+        const createdDate = goal.created_at.split('T')[0]
+        return createdDate === dateStr
+      }
       const start = goal.start_date ? format(new Date(goal.start_date), 'yyyy-MM-dd') : null
       const end = goal.target_date ? format(new Date(goal.target_date), 'yyyy-MM-dd') : null
       // 有开始和截止：显示范围内每一天
@@ -154,6 +159,8 @@ export default function CalendarPage() {
               const isSelected = selectedDate && isSameDay(day, selectedDate)
               const isTodayDate = isToday(day)
               const hasGoals = items.goals.length > 0
+              const hasDailyGoals = items.goals.some(g => g.is_daily)
+              const hasRegularGoals = items.goals.some(g => !g.is_daily)
               const hasTasks = items.tasks.length > 0
 
               return (
@@ -170,7 +177,8 @@ export default function CalendarPage() {
                 >
                   <span className="text-sm">{format(day, 'd')}</span>
                   <div className="flex gap-0.5 mt-0.5">
-                    {hasGoals && <div className="w-1.5 h-1.5 rounded-full bg-blue-500" />}
+                    {hasRegularGoals && <div className="w-1.5 h-1.5 rounded-full bg-blue-500" />}
+                    {hasDailyGoals && <div className="w-1.5 h-1.5 rounded-full bg-orange-500" />}
                     {hasTasks && <div className="w-1.5 h-1.5 rounded-full bg-green-500" />}
                   </div>
                 </button>
@@ -181,6 +189,7 @@ export default function CalendarPage() {
           {/* Legend */}
           <div className="flex items-center gap-4 mt-4 text-sm text-gray-500">
             <div className="flex items-center gap-1"><div className="w-3 h-3 rounded-full bg-blue-500" /> 目标</div>
+            <div className="flex items-center gap-1"><div className="w-3 h-3 rounded-full bg-orange-500" /> 每日目标</div>
             <div className="flex items-center gap-1"><div className="w-3 h-3 rounded-full bg-green-500" /> 任务</div>
           </div>
         </div>
@@ -205,6 +214,7 @@ export default function CalendarPage() {
                       <div className="flex items-center gap-2">
                         <div className={`w-2 h-2 rounded-full ${
                           goal.status === 'completed' ? 'bg-green-500' :
+                          goal.is_daily ? 'bg-orange-500' :
                           goal.priority === 'high' ? 'bg-red-500' :
                           goal.priority === 'medium' ? 'bg-yellow-500' : 'bg-green-500'
                         }`} />
@@ -214,6 +224,7 @@ export default function CalendarPage() {
                             : 'text-gray-900 dark:text-white'
                         }`}>{goal.title}</span>
                         {goal.is_key_goal && <span className="text-yellow-500">★</span>}
+                        {goal.is_daily && <span className="text-xs px-1.5 py-0.5 bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400 rounded">每日</span>}
                       </div>
                       {goal.target_date && (
                         <p className="text-xs text-gray-400 mt-1">

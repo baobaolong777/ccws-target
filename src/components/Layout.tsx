@@ -4,9 +4,10 @@ import { supabase } from '../lib/supabase'
 
 interface LayoutProps {
   children: ReactNode
+  headerExtra?: ReactNode
 }
 
-export default function Layout({ children }: LayoutProps) {
+export default function Layout({ children, headerExtra }: LayoutProps) {
   const location = useLocation()
   const navigate = useNavigate()
 
@@ -35,12 +36,15 @@ export default function Layout({ children }: LayoutProps) {
             <h1 className="text-xl font-bold text-gray-900 dark:text-white">
               CCWS 目标管理
             </h1>
-            <button
-              onClick={handleLogout}
-              className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white text-sm"
-            >
-              退出
-            </button>
+            <div className="flex items-center gap-3">
+              {headerExtra}
+              <button
+                onClick={handleLogout}
+                className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white text-sm"
+              >
+                退出
+              </button>
+            </div>
           </div>
         </div>
       </header>

@@ -1,0 +1,149 @@
+import { useState, useEffect } from 'react'
+import { Goal, goalService } from '../../lib/db'
+
+interface DailyGoalsProps {
+  onComplete: (goalId: string) => void
+  onUndoComplete: (goalId: string) => void
+}
+
+export default function DailyGoals({ onComplete, onUndoComplete }: DailyGoalsProps) {
+  const [goals, setGoals] = useState<Goal[]>([])
+  const [newTitle, setNewTitle] = useState('')
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => { loadGoals() }, [])
+
+  const loadGoals = async () => {
+    try {
+      const allGoals = await goalService.getAll()
+      // Filter daily goals created today
+      const today = new Date().toISOString().split('T')[0]
+      const dailyGoals = allGoals.filter(g =>
+        g.is_daily &&
+        g.created_at.split('T')[0] === today
+      )
+      setGoals(dailyGoals)
+    } catch (error) {
+      console.error('加载每日目标失败:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleAdd = async () => {
+    if (!newTitle.trim()) return
+    try {
+      await goalService.create({
+        title: newTitle.trim(),
+        description: '',
+        status: 'pending',
+        priority: 'medium',
+        is_key_goal: false,
+        is_daily: true,
+        tags: [],
+        folder_id: null,
+        parent_id: null,
+        start_date: null,
+        order_index: 0,
+        time_spent: 0,
+        reminder_at: null,
+        is_deleted: false,
+        deleted_at: null,
+        repeat_rule: null,
+        target_date: null,
+        completed_at: null
+      })
+      setNewTitle('')
+      loadGoals()
+    } catch (error) {
+      console.error('添加失败:', error)
+    }
+  }
+
+  const handleComplete = async (goalId: string) => {
+    // Complete = remove from daily list (set as completed)
+    setGoals(prev => prev.filter(g => g.id !== goalId))
+    onComplete(goalId)
+  }
+
+  const handleUndo = async (goalId: string) => {
+    loadGoals()
+    onUndoComplete(goalId)
+  }
+
+  if (loading) return null
+
+  return (
+    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4">
+      <div className="flex items-center justify-between mb-4">
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+          📅 今日目标
+        </h3>
+        <span className="text-sm text-gray-500">
+          {goals.filter(g => g.status === 'completed').length}/{goals.length}
+        </span>
+      </div>
+
+      {/* Add form */}
+      <div className="flex gap-2 mb-4">
+        <input
+          type="text"
+          placeholder="添加今日目标..."
+          value={newTitle}
+          onChange={(e) => setNewTitle(e.target.value)}
+          onKeyDown={(e) => e.key === 'Enter' && handleAdd()}
+          className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white text-sm"
+        />
+        <button
+          onClick={handleAdd}
+          className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 text-sm"
+        >
+          添加
+        </button>
+      </div>
+
+      {/* Goal list */}
+      {goals.length === 0 ? (
+        <p className="text-gray-500 text-center py-4 text-sm">
+          今天还没有目标，添加一个吧！
+        </p>
+      ) : (
+        <div className="space-y-2">
+          {goals.map(goal => (
+            <div
+              key={goal.id}
+              className={`flex items-center gap-3 p-3 rounded-lg transition-colors ${
+                goal.status === 'completed'
+                  ? 'bg-green-50 dark:bg-green-900/20'
+                  : 'bg-gray-50 dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600'
+              }`}
+            >
+              <button
+                onClick={() => {
+                  if (goal.status === 'completed') handleUndo(goal.id!)
+                  else handleComplete(goal.id!)
+                }}
+                className={`w-5 h-5 rounded border-2 flex items-center justify-center ${
+                  goal.status === 'completed'
+                    ? 'bg-green-500 border-green-500'
+                    : 'border-gray-300 dark:border-gray-600'
+                }`}
+              >
+                {goal.status === 'completed' && (
+                  <span className="text-white text-xs">✓</span>
+                )}
+              </button>
+              <span className={`flex-1 ${
+                goal.status === 'completed'
+                  ? 'line-through text-gray-400'
+                  : 'text-gray-900 dark:text-white'
+              }`}>
+                {goal.title}
+              </span>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
