@@ -41,9 +41,28 @@ export default function StatsPage() {
   const monthStart = startOfMonth(now)
   const monthEnd = endOfMonth(now)
 
-  const completedGoals = goals.filter(g => g.status === 'completed')
+  // 已完成目标：已完成且不是今天完成的（今天完成的还在全部目标里）
+  const todayStr = now.toISOString().split('T')[0]
+  const completedGoals = goals.filter(g => {
+    if (g.status !== 'completed') return false
+    if (g.completed_at) {
+      const completedDate = new Date(g.completed_at).toISOString().split('T')[0]
+      return completedDate !== todayStr
+    }
+    return true
+  })
   const pendingGoals = goals.filter(g => g.status === 'pending')
   const inProgressGoals = goals.filter(g => g.status === 'in_progress')
+
+  // 今天完成的目标（还在全部目标里显示）
+  const todayCompleted = goals.filter(g => {
+    if (g.status !== 'completed') return false
+    if (g.completed_at) {
+      const completedDate = new Date(g.completed_at).toISOString().split('T')[0]
+      return completedDate === todayStr
+    }
+    return false
+  })
 
   // 本周完成的目标
   const weekCompleted = completedGoals.filter(g => {
@@ -90,7 +109,13 @@ export default function StatsPage() {
           color="blue"
         />
         <StatCard
-          title="已完成"
+          title="今天完成"
+          value={todayCompleted.length}
+          icon="🔥"
+          color="orange"
+        />
+        <StatCard
+          title="历史完成"
           value={completedGoals.length}
           icon="✅"
           color="green"
@@ -254,6 +279,7 @@ function StatCard({ title, value, icon, color }: {
     blue: 'bg-blue-50 dark:bg-blue-900/30 text-blue-500',
     green: 'bg-green-50 dark:bg-green-900/30 text-green-500',
     yellow: 'bg-yellow-50 dark:bg-yellow-900/30 text-yellow-500',
+    orange: 'bg-orange-50 dark:bg-orange-900/30 text-orange-500',
     gray: 'bg-gray-50 dark:bg-gray-700 text-gray-500'
   }
 

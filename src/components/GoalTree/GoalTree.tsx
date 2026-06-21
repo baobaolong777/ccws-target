@@ -13,8 +13,19 @@ interface GoalTreeProps {
 export default function GoalTree({ goals, onComplete, onUndoComplete, onSelect, onRefresh }: GoalTreeProps) {
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set())
 
-  // 只显示未完成的目标（已完成的移到统计页面）
-  const activeGoals = goals.filter(goal => goal.status !== 'completed')
+  // 全部目标显示：未完成的 + 今天完成的（保留一天）
+  const today = new Date()
+  const todayStr = today.toISOString().split('T')[0]
+
+  const activeGoals = goals.filter(goal => {
+    if (goal.status !== 'completed') return true
+    // 已完成的，只显示今天完成的
+    if (goal.completed_at) {
+      const completedDate = new Date(goal.completed_at).toISOString().split('T')[0]
+      return completedDate === todayStr
+    }
+    return true
+  })
 
   // 获取根目标（没有父目标的）
   const rootGoals = activeGoals.filter(goal => !goal.parent_id)
