@@ -32,11 +32,15 @@ export default function GoalTreeNode({
   const hasChildren = children.length > 0
   const isExpanded = expandedIds.has(goal.id!)
 
-  // 计算倒计时
+  // 计算倒计时（只比较日期，忽略时间）
   const getDaysRemaining = () => {
     if (!goal.target_date) return null
-    const targetDate = new Date(goal.target_date)
-    const days = differenceInDays(targetDate, new Date())
+    const target = new Date(goal.target_date)
+    const today = new Date()
+    // 只取年月日，忽略时间
+    const targetDateOnly = new Date(target.getFullYear(), target.getMonth(), target.getDate())
+    const todayDateOnly = new Date(today.getFullYear(), today.getMonth(), today.getDate())
+    const days = differenceInDays(targetDateOnly, todayDateOnly)
     return days
   }
 

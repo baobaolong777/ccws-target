@@ -10,11 +10,14 @@ interface KeyGoalsPanelProps {
 }
 
 export default function KeyGoalsPanel({ goals, maxCount, onComplete, onUndoComplete, onSelect }: KeyGoalsPanelProps) {
-  // 计算倒计时
+  // 计算倒计时（只比较日期，忽略时间）
   const getDaysRemaining = (goal: Goal) => {
     if (!goal.target_date) return null
-    const targetDate = new Date(goal.target_date)
-    return differenceInDays(targetDate, new Date())
+    const target = new Date(goal.target_date)
+    const today = new Date()
+    const targetDateOnly = new Date(target.getFullYear(), target.getMonth(), target.getDate())
+    const todayDateOnly = new Date(today.getFullYear(), today.getMonth(), today.getDate())
+    return differenceInDays(targetDateOnly, todayDateOnly)
   }
 
   // 获取优先级颜色
