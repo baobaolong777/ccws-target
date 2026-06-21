@@ -13,8 +13,11 @@ interface GoalTreeProps {
 export default function GoalTree({ goals, onComplete, onUndoComplete, onSelect, onRefresh }: GoalTreeProps) {
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set())
 
+  // 只显示未完成的目标（已完成的移到统计页面）
+  const activeGoals = goals.filter(goal => goal.status !== 'completed')
+
   // 获取根目标（没有父目标的）
-  const rootGoals = goals.filter(goal => !goal.parent_id)
+  const rootGoals = activeGoals.filter(goal => !goal.parent_id)
 
   // 切换展开/折叠
   const toggleExpand = (goalId: string) => {
@@ -31,7 +34,7 @@ export default function GoalTree({ goals, onComplete, onUndoComplete, onSelect, 
 
   // 获取子目标
   const getChildren = (parentId: string) => {
-    return goals.filter(goal => goal.parent_id === parentId)
+    return activeGoals.filter(goal => goal.parent_id === parentId)
   }
 
   return (
@@ -52,7 +55,7 @@ export default function GoalTree({ goals, onComplete, onUndoComplete, onSelect, 
             <GoalTreeNode
               key={goal.id}
               goal={goal}
-              goals={goals}
+              goals={activeGoals}
               expandedIds={expandedIds}
               onToggleExpand={toggleExpand}
               onComplete={onComplete}

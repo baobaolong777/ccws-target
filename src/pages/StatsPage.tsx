@@ -21,6 +21,19 @@ export default function StatsPage() {
     }
   }
 
+  // 撤销完成
+  const handleUndoComplete = async (goalId: string) => {
+    try {
+      await goalService.update(goalId, {
+        status: 'pending',
+        completed_at: null
+      })
+      loadGoals()
+    } catch (error) {
+      console.error('撤销完成失败:', error)
+    }
+  }
+
   // 计算统计数据
   const now = new Date()
   const weekStart = startOfWeek(now, { weekStartsOn: 1 })
@@ -175,36 +188,50 @@ export default function StatsPage() {
         </div>
       </div>
 
-      {/* 最近完成的目标 */}
+      {/* 已完成目标 */}
       <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
         <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-          ✨ 最近完成
+          ✅ 已完成目标 ({completedGoals.length})
         </h3>
         {completedGoals.length > 0 ? (
-          <div className="space-y-3">
+          <div className="space-y-2">
             {completedGoals
               .sort((a, b) => {
                 const aTime = a.completed_at ? new Date(a.completed_at).getTime() : 0
                 const bTime = b.completed_at ? new Date(b.completed_at).getTime() : 0
                 return bTime - aTime
               })
-              .slice(0, 5)
               .map((goal) => (
                 <div
                   key={goal.id}
-                  className="flex items-center gap-3 p-3 bg-green-50 dark:bg-green-900/20 rounded-lg"
+                  className="flex items-center gap-3 p-3 bg-green-50 dark:bg-green-900/20 rounded-lg hover:bg-green-100 dark:hover:bg-green-900/30 transition-colors"
                 >
-                  <span className="text-green-500">✅</span>
+                  <button
+                    onClick={() => handleUndoComplete(goal.id!)}
+                    className="w-5 h-5 rounded border-2 bg-green-500 border-green-500 flex items-center justify-center hover:bg-green-600 transition-colors"
+                    title="取消完成"
+                  >
+                    <span className="text-white text-xs">✓</span>
+                  </button>
                   <div className="flex-1">
                     <span className="font-medium text-gray-900 dark:text-white line-through">
                       {goal.title}
                     </span>
+                    {goal.description && (
+                      <p className="text-sm text-gray-500 line-clamp-1">{goal.description}</p>
+                    )}
                   </div>
                   <span className="text-sm text-gray-500">
                     {goal.completed_at
                       ? format(new Date(goal.completed_at), 'M/d')
                       : ''}
                   </span>
+                  <button
+                    onClick={() => handleUndoComplete(goal.id!)}
+                    className="text-blue-500 hover:text-blue-600 text-sm px-2 py-1"
+                  >
+                    取消完成
+                  </button>
                 </div>
               ))}
           </div>

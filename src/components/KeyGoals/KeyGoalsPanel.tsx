@@ -20,6 +20,7 @@ export default function KeyGoalsPanel({ goals, maxCount, onComplete, onUndoCompl
 
   const visibleGoals = goals.filter(goal => {
     if (!goal.is_key_goal) return false
+    if (goal.status === 'completed') return false
     if (goal.start_date && goal.start_date.split('T')[0] > todayStr) return false
     return true
   }).slice(0, maxCount)
