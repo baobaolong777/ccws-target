@@ -134,10 +134,25 @@ export default function HomePage() {
 
   // 撤销完成
   const handleUndoComplete = async (goalId: string) => {
+    // 找到被取消完成的目标
+    const goalToUndo = goals.find(g => g.id === goalId)
+
     // Optimistic update
     setGoals(prev => prev.map(g =>
       g.id === goalId ? { ...g, status: 'pending', completed_at: null } : g
     ))
+
+    // 如果是重点目标，加回重点目标列表
+    if (goalToUndo?.is_key_goal) {
+      setKeyGoals(prev => {
+        // 避免重复添加
+        if (prev.some(g => g.id === goalId)) return prev
+        const maxCount = settings?.key_goals_count || 5
+        if (prev.length >= maxCount) return prev
+        return [...prev, { ...goalToUndo, status: 'pending', completed_at: null }]
+      })
+    }
+
     try {
       await goalService.update(goalId, {
         status: 'pending',
