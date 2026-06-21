@@ -35,6 +35,14 @@ export default function ProfilePage() {
     try {
       await settingsService.update(data)
       setSettings(prev => prev ? { ...prev, ...data } : null)
+      // Apply theme change immediately
+      if (data.theme) {
+        if (data.theme === 'dark') {
+          document.documentElement.classList.add('dark')
+        } else {
+          document.documentElement.classList.remove('dark')
+        }
+      }
     } catch (error) {
       console.error('更新设置失败:', error)
     } finally {

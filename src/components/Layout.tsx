@@ -46,7 +46,7 @@ export default function Layout({ children }: LayoutProps) {
       </header>
 
       {/* 主内容 */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 pb-24 md:pb-6">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 pb-24 md:pb-6 md:ml-64">
         {children}
       </main>
 
@@ -90,10 +90,6 @@ export default function Layout({ children }: LayoutProps) {
         </nav>
       </aside>
 
-      {/* 桌面端主内容偏移 */}
-      <div className="hidden md:block ml-64">
-        {/* 内容已经在 main 中 */}
-      </div>
     </div>
   )
 }

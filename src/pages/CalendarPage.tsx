@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { goalService, taskService, Goal, Task } from '../lib/db'
-import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, isToday, addMonths, subMonths } from 'date-fns'
+import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, isToday, addMonths, subMonths, startOfWeek, endOfWeek } from 'date-fns'
 import { zhCN } from 'date-fns/locale'
 import GoalDetailModal from '../components/KeyGoals/GoalDetailModal'
 
@@ -21,17 +21,15 @@ export default function CalendarPage() {
     try {
       const goalsData = await goalService.getAll()
       setGoals(goalsData)
-      // Load tasks for all goals and add goal title
-      const allTasks: (Task & { goal_title?: string })[] = []
-      for (const goal of goalsData) {
-        try {
-          const goalTasks = await taskService.getByGoal(goal.id!)
-          allTasks.push(...goalTasks.map(t => ({ ...t, goal_title: goal.title })))
-        } catch {
-          // skip tasks for goals that fail to load
-        }
-      }
-      setTasks(allTasks as Task[])
+      // Load tasks for all goals in parallel
+      const allTasksResults = await Promise.all(
+        goalsData.map(goal =>
+          taskService.getByGoal(goal.id!)
+            .then(goalTasks => goalTasks.map(t => ({ ...t, goal_title: goal.title })))
+            .catch(() => [])
+        )
+      )
+      setTasks(allTasksResults.flat() as Task[])
     } catch (error) {
       console.error('加载数据失败:', error)
     } finally {
@@ -41,7 +39,12 @@ export default function CalendarPage() {
 
   const monthStart = startOfMonth(currentMonth)
   const monthEnd = endOfMonth(currentMonth)
-  const days = eachDayOfInterval({ start: monthStart, end: monthEnd })
+  const monthDays = eachDayOfInterval({ start: monthStart, end: monthEnd })
+
+  // For week view, show only the 7 days of the current week
+  const days = viewMode === 'week'
+    ? eachDayOfInterval({ start: startOfWeek(currentMonth, { weekStartsOn: 0 }), end: endOfWeek(currentMonth, { weekStartsOn: 0 }) })
+    : monthDays
 
   // Get items for a specific date (goals in range + tasks in range)
   const getItemsForDate = (date: Date) => {
@@ -143,7 +146,7 @@ export default function CalendarPage() {
 
           {/* Days grid */}
           <div className="grid grid-cols-7 gap-1">
-            {Array.from({ length: monthStart.getDay() }).map((_, i) => (
+            {viewMode === 'month' && Array.from({ length: monthStart.getDay() }).map((_, i) => (
               <div key={`empty-${i}`} className="aspect-square" />
             ))}
             {days.map(day => {

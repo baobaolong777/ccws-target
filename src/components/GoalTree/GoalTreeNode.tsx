@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Goal, Task, goalService, taskService } from '../../lib/db'
+
 import { format, differenceInDays } from 'date-fns'
 import GoalDetailModal from '../KeyGoals/GoalDetailModal'
 
@@ -54,10 +55,12 @@ export default function GoalTreeNode({
   const hasChildren = children.length > 0
   const isExpanded = expandedIds.has(goal.id!)
 
-  // 加载任务
+  // 加载任务 - only when tasks are shown or node is expanded
   useEffect(() => {
-    loadTasks()
-  }, [goal.id])
+    if (showTasks || isExpanded) {
+      loadTasks()
+    }
+  }, [goal.id, showTasks, isExpanded])
 
   const loadTasks = async () => {
     try {
@@ -67,6 +70,15 @@ export default function GoalTreeNode({
       console.error('加载任务失败:', error)
     }
   }
+
+  // Close context menu on outside click
+  useEffect(() => {
+    const handleClickOutside = () => setShowMenu(false)
+    if (showMenu) {
+      document.addEventListener('click', handleClickOutside)
+      return () => document.removeEventListener('click', handleClickOutside)
+    }
+  }, [showMenu])
 
   const handleCompleteTask = async (taskId: string, completed: boolean) => {
     try {

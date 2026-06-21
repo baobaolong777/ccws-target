@@ -50,10 +50,18 @@ export default function TrashPage() {
       return
     }
     try {
-      const promises = deletedGoals.map(goal =>
-        goalService.hardDelete(goal.id!)
-      )
-      await Promise.all(promises)
+      // Sequential deletion to avoid conflicts with recursive hardDelete
+      for (const goal of deletedGoals) {
+        // Only delete top-level goals; hardDelete will handle children recursively
+        if (!goal.parent_id) {
+          await goalService.hardDelete(goal.id!)
+        }
+      }
+      // Delete any remaining child goals that weren't covered by parent recursion
+      const remainingGoals = await goalService.getDeleted()
+      for (const goal of remainingGoals) {
+        await goalService.hardDelete(goal.id!)
+      }
       await loadDeletedGoals()
     } catch (error) {
       console.error('清空回收站失败:', error)

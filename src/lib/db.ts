@@ -102,13 +102,19 @@ export const goalService = {
     if (error) throw error
   },
 
-  // 永久删除目标
+  // 永久删除目标（级联删除子目标和任务）
   async hardDelete(goalId: string) {
-    const { error } = await supabase
-      .from('goals')
-      .delete()
-      .eq('id', goalId)
-
+    // Delete tasks for this goal
+    await supabase.from('tasks').delete().eq('goal_id', goalId)
+    // Delete child goals recursively
+    const { data: children } = await supabase.from('goals').select('id').eq('parent_id', goalId)
+    if (children) {
+      for (const child of children) {
+        await goalService.hardDelete(child.id)
+      }
+    }
+    // Delete the goal itself
+    const { error } = await supabase.from('goals').delete().eq('id', goalId)
     if (error) throw error
   },
 
@@ -258,26 +264,40 @@ export const settingsService = {
       .from('settings')
       .select('*')
       .eq('user_id', userId)
-      .single()
 
-    if (error || !data) {
-      // 创建默认设置
-      const { data: newData, error: insertError } = await supabase
-        .from('settings')
-        .insert({
-          user_id: userId,
-          key_goals_count: 5,
-          theme: 'light',
-          reminder_enabled: true
-        })
-        .select()
-        .single()
+    if (error) throw error
 
-      if (insertError) throw insertError
-      return newData as UserSettings
+    if (data && data.length > 0) {
+      return data[0] as UserSettings
     }
 
-    return data as UserSettings
+    // No settings exist yet, create default
+    const { data: newData, error: insertError } = await supabase
+      .from('settings')
+      .insert({
+        user_id: userId,
+        key_goals_count: 5,
+        theme: 'light',
+        reminder_enabled: true
+      })
+      .select()
+      .single()
+
+    if (insertError) {
+      // Race condition: another request may have inserted first, try fetching again
+      const { data: retryData, error: retryError } = await supabase
+        .from('settings')
+        .select('*')
+        .eq('user_id', userId)
+
+      if (retryError) throw retryError
+      if (retryData && retryData.length > 0) {
+        return retryData[0] as UserSettings
+      }
+      throw insertError
+    }
+
+    return newData as UserSettings
   },
 
   async update(data: Partial<UserSettings>) {
@@ -392,16 +412,15 @@ export const exportService = {
     const headers = ['ID', '标题', '描述', '状态', '优先级', '标签', '创建时间', '目标时间', '完成时间']
     const rows = goals.map(goal => [
       goal.id,
-      goal.title,
-      goal.description,
+      `"${(goal.title || '').replace(/"/g, '""')}"`,
+      `"${(goal.description || '').replace(/"/g, '""')}"`,
       goal.status,
       goal.priority,
-      goal.tags.join(';'),
+      `"${(goal.tags || []).join(';')}"`,
       goal.created_at,
       goal.target_date,
       goal.completed_at
     ])
-
     const csv = [headers, ...rows].map(row => row.join(',')).join('\n')
     return csv
   },

@@ -101,7 +101,7 @@ export default function StatsPage() {
       <h2 className="text-2xl font-bold text-gray-900 dark:text-white">统计面板</h2>
 
       {/* 总览卡片 */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
         <StatCard
           title="总目标数"
           value={goals.length}

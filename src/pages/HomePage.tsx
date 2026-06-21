@@ -6,6 +6,7 @@ import GoalDetail from '../components/GoalDetail/GoalDetail'
 import FolderList from '../components/Folder/FolderList'
 
 export default function HomePage() {
+  const [allGoals, setAllGoals] = useState<Goal[]>([])
   const [goals, setGoals] = useState<Goal[]>([])
   const [keyGoals, setKeyGoals] = useState<Goal[]>([])
   const [folders, setFolders] = useState<any[]>([])
@@ -29,6 +30,7 @@ export default function HomePage() {
         settingsService.get()
       ])
 
+      setAllGoals(goalsData)
       setGoals(goalsData)
       setFolders(foldersData)
       setSettings(settingsData)
@@ -46,7 +48,7 @@ export default function HomePage() {
   // 搜索
   const handleSearch = async () => {
     if (!searchKeyword.trim()) {
-      loadData()
+      setGoals(allGoals) // restore from cache
       return
     }
     try {
@@ -284,8 +286,8 @@ function NewGoalModal({ folders, onSubmit, onClose }: {
       title,
       description,
       priority,
-      start_date: startDate ? new Date(startDate) as any : null,
-      target_date: targetDate ? new Date(targetDate) as any : null,
+      start_date: startDate || null,
+      target_date: targetDate || null,
       folder_id: folderId,
       is_key_goal: isKeyGoal
     })

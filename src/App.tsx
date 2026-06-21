@@ -15,8 +15,18 @@ function App() {
 
   useEffect(() => {
     // 获取初始会话
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
       setUser(session?.user ?? null)
+      // Apply saved theme on startup
+      const { data: { user } } = await supabase.auth.getUser()
+      if (user) {
+        const { data: settings } = await supabase.from('settings').select('theme').eq('user_id', user.id).single()
+        if (settings?.theme === 'dark') {
+          document.documentElement.classList.add('dark')
+        } else {
+          document.documentElement.classList.remove('dark')
+        }
+      }
       setLoading(false)
     })
 
