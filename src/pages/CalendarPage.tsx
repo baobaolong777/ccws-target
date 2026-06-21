@@ -51,11 +51,8 @@ export default function CalendarPage() {
     const dateStr = format(date, 'yyyy-MM-dd')
     const goalsForDate = goals.filter(goal => {
       if (goal.status === 'cancelled' || goal.is_deleted) return false
-      // Daily goals: show on the day they were created
-      if (goal.is_daily) {
-        const createdDate = goal.created_at.split('T')[0]
-        return createdDate === dateStr
-      }
+      // Daily goals: show every day
+      if (goal.is_daily) return true
       const start = goal.start_date ? format(new Date(goal.start_date), 'yyyy-MM-dd') : null
       const end = goal.target_date ? format(new Date(goal.target_date), 'yyyy-MM-dd') : null
       // 有开始和截止：显示范围内每一天

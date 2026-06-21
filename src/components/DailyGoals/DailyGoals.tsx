@@ -16,12 +16,8 @@ export default function DailyGoals({ onComplete, onUndoComplete }: DailyGoalsPro
   const loadGoals = async () => {
     try {
       const allGoals = await goalService.getAll()
-      // Filter daily goals created today
-      const today = new Date().toISOString().split('T')[0]
-      const dailyGoals = allGoals.filter(g =>
-        g.is_daily &&
-        g.created_at.split('T')[0] === today
-      )
+      // 显示所有每日目标（不按日期过滤）
+      const dailyGoals = allGoals.filter(g => g.is_daily)
       setGoals(dailyGoals)
     } catch (error) {
       console.error('加载每日目标失败:', error)
@@ -44,7 +40,7 @@ export default function DailyGoals({ onComplete, onUndoComplete }: DailyGoalsPro
         folder_id: null,
         parent_id: null,
         start_date: null,
-        order_index: 0,
+        order_index: goals.length,
         time_spent: 0,
         reminder_at: null,
         is_deleted: false,
@@ -61,15 +57,32 @@ export default function DailyGoals({ onComplete, onUndoComplete }: DailyGoalsPro
   }
 
   const handleComplete = async (goalId: string) => {
-    // Complete = remove from daily list (set as completed)
-    setGoals(prev => prev.filter(g => g.id !== goalId))
+    // 标记为今日完成
+    setGoals(prev => prev.map(g =>
+      g.id === goalId ? { ...g, status: 'completed', completed_at: new Date().toISOString() } : g
+    ))
     onComplete(goalId)
   }
 
   const handleUndo = async (goalId: string) => {
-    loadGoals()
+    // 取消今日完成
+    setGoals(prev => prev.map(g =>
+      g.id === goalId ? { ...g, status: 'pending', completed_at: null } : g
+    ))
     onUndoComplete(goalId)
   }
+
+  const handleDelete = async (goalId: string) => {
+    if (!confirm('确定要删除这个每日目标吗？')) return
+    try {
+      await goalService.softDelete(goalId)
+      loadGoals()
+    } catch (error) {
+      console.error('删除失败:', error)
+    }
+  }
+
+  const completedCount = goals.filter(g => g.status === 'completed').length
 
   if (loading) return null
 
@@ -77,10 +90,10 @@ export default function DailyGoals({ onComplete, onUndoComplete }: DailyGoalsPro
     <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4">
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-          📅 今日目标
+          🔄 每日目标
         </h3>
         <span className="text-sm text-gray-500">
-          {goals.filter(g => g.status === 'completed').length}/{goals.length}
+          {completedCount}/{goals.length}
         </span>
       </div>
 
@@ -88,7 +101,7 @@ export default function DailyGoals({ onComplete, onUndoComplete }: DailyGoalsPro
       <div className="flex gap-2 mb-4">
         <input
           type="text"
-          placeholder="添加今日目标..."
+          placeholder="添加每日目标..."
           value={newTitle}
           onChange={(e) => setNewTitle(e.target.value)}
           onKeyDown={(e) => e.key === 'Enter' && handleAdd()}
@@ -105,14 +118,14 @@ export default function DailyGoals({ onComplete, onUndoComplete }: DailyGoalsPro
       {/* Goal list */}
       {goals.length === 0 ? (
         <p className="text-gray-500 text-center py-4 text-sm">
-          今天还没有目标，添加一个吧！
+          还没有每日目标，添加一个吧！
         </p>
       ) : (
         <div className="space-y-2">
           {goals.map(goal => (
             <div
               key={goal.id}
-              className={`flex items-center gap-3 p-3 rounded-lg transition-colors ${
+              className={`flex items-center gap-3 p-3 rounded-lg transition-colors group ${
                 goal.status === 'completed'
                   ? 'bg-green-50 dark:bg-green-900/20'
                   : 'bg-gray-50 dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600'
@@ -140,6 +153,12 @@ export default function DailyGoals({ onComplete, onUndoComplete }: DailyGoalsPro
               }`}>
                 {goal.title}
               </span>
+              <button
+                onClick={() => handleDelete(goal.id!)}
+                className="opacity-0 group-hover:opacity-100 text-red-400 hover:text-red-600 text-sm transition-opacity"
+              >
+                ✕
+              </button>
             </div>
           ))}
         </div>
