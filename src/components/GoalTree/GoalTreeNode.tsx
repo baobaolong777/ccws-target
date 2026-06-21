@@ -31,6 +31,13 @@ export default function GoalTreeNode({
   const [showMenu, setShowMenu] = useState(false)
   const [showAddChild, setShowAddChild] = useState(false)
   const [showAddTask, setShowAddTask] = useState(false)
+  const [showEditGoal, setShowEditGoal] = useState(false)
+  const [editTitle, setEditTitle] = useState(goal.title)
+  const [editDescription, setEditDescription] = useState(goal.description || '')
+  const [editPriority, setEditPriority] = useState(goal.priority)
+  const [editStatus, setEditStatus] = useState(goal.status)
+  const [editStartDate, setEditStartDate] = useState(goal.start_date ? new Date(goal.start_date).toISOString().split('T')[0] : '')
+  const [editTargetDate, setEditTargetDate] = useState(goal.target_date ? new Date(goal.target_date).toISOString().split('T')[0] : '')
   const [childTitle, setChildTitle] = useState('')
   const [childDescription, setChildDescription] = useState('')
   const [childPriority, setChildPriority] = useState<'high' | 'medium' | 'low'>('medium')
@@ -176,6 +183,25 @@ export default function GoalTreeNode({
     }
   }
 
+  // 编辑目标
+  const handleEditGoal = async () => {
+    if (!editTitle.trim()) return
+    try {
+      await goalService.update(goal.id!, {
+        title: editTitle.trim(),
+        description: editDescription.trim(),
+        priority: editPriority,
+        status: editStatus,
+        start_date: editStartDate ? new Date(editStartDate).toISOString() : null,
+        target_date: editTargetDate ? new Date(editTargetDate).toISOString() : null,
+      })
+      setShowEditGoal(false)
+      onRefresh()
+    } catch (error) {
+      console.error('编辑目标失败:', error)
+    }
+  }
+
   const handleDelete = async () => {
     if (!confirm('确定要删除这个目标吗？')) return
     try {
@@ -274,8 +300,14 @@ export default function GoalTreeNode({
             {showMenu && (
               <div className="absolute right-0 top-full mt-1 w-36 bg-white dark:bg-gray-700 rounded-lg shadow-lg border border-gray-200 dark:border-gray-600 z-10">
                 <button
-                  onClick={(e) => { e.stopPropagation(); setShowAddChild(true); setShowMenu(false) }}
+                  onClick={(e) => { e.stopPropagation(); setShowEditGoal(true); setShowMenu(false) }}
                   className="w-full px-3 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-600 rounded-t-lg"
+                >
+                  ✏️ 编辑
+                </button>
+                <button
+                  onClick={(e) => { e.stopPropagation(); setShowAddChild(true); setShowMenu(false) }}
+                  className="w-full px-3 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-600"
                 >
                   ➕ 添加子目标
                 </button>
@@ -445,6 +477,68 @@ export default function GoalTreeNode({
                     className="flex-1 py-2 px-4 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700">取消</button>
                   <button onClick={handleAddTask}
                     className="flex-1 py-2 px-4 bg-blue-500 text-white rounded-lg hover:bg-blue-600">添加</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 编辑目标弹窗 */}
+      {showEditGoal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={() => setShowEditGoal(false)}>
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-md" onClick={e => e.stopPropagation()}>
+            <div className="p-6">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">编辑目标</h3>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">标题 *</label>
+                  <input type="text" value={editTitle} onChange={e => setEditTitle(e.target.value)}
+                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">描述</label>
+                  <textarea value={editDescription} onChange={e => setEditDescription(e.target.value)} rows={3}
+                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white" />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">状态</label>
+                    <select value={editStatus} onChange={e => setEditStatus(e.target.value as any)}
+                      className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white">
+                      <option value="pending">待完成</option>
+                      <option value="in_progress">进行中</option>
+                      <option value="completed">已完成</option>
+                      <option value="cancelled">已取消</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">优先级</label>
+                    <select value={editPriority} onChange={e => setEditPriority(e.target.value as any)}
+                      className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white">
+                      <option value="high">高</option>
+                      <option value="medium">中</option>
+                      <option value="low">低</option>
+                    </select>
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">开始日期</label>
+                    <input type="date" value={editStartDate} onChange={e => setEditStartDate(e.target.value)}
+                      className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">截止日期</label>
+                    <input type="date" value={editTargetDate} onChange={e => setEditTargetDate(e.target.value)}
+                      className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white" />
+                  </div>
+                </div>
+                <div className="flex gap-3 pt-2">
+                  <button onClick={() => setShowEditGoal(false)}
+                    className="flex-1 py-2 px-4 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700">取消</button>
+                  <button onClick={handleEditGoal}
+                    className="flex-1 py-2 px-4 bg-blue-500 text-white rounded-lg hover:bg-blue-600">保存</button>
                 </div>
               </div>
             </div>
