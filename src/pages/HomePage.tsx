@@ -6,6 +6,7 @@ import GoalTree from '../components/GoalTree/GoalTree'
 import GoalDetail from '../components/GoalDetail/GoalDetail'
 import FolderList from '../components/Folder/FolderList'
 import DailyGoals from '../components/DailyGoals/DailyGoals'
+import { useToast } from '../components/Toast/Toast'
 
 export default function HomePage({ showNewGoal, setShowNewGoal }: { showNewGoal: boolean; setShowNewGoal: (v: boolean) => void }) {
   const [allGoals, setAllGoals] = useState<Goal[]>([])
@@ -17,10 +18,18 @@ export default function HomePage({ showNewGoal, setShowNewGoal }: { showNewGoal:
   const [selectedFolderId, setSelectedFolderId] = useState<string | null>(null)
   const [searchKeyword, setSearchKeyword] = useState('')
   const [loading, setLoading] = useState(true)
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false)
+  const { showToast } = useToast()
 
   // 加载数据
   useEffect(() => {
     loadData()
+  }, [])
+
+  // Clear search on mount
+  useEffect(() => {
+    setSearchKeyword('')
+    setGoals(allGoals)
   }, [])
 
   const loadData = async () => {
@@ -61,18 +70,27 @@ export default function HomePage({ showNewGoal, setShowNewGoal }: { showNewGoal:
     }
   }
 
-  // 搜索
-  const handleSearch = async () => {
-    if (!searchKeyword.trim()) {
-      setGoals(allGoals) // restore from cache
-      return
+  // 搜索 - 实时过滤
+  const handleSearchChange = (keyword: string) => {
+    setSearchKeyword(keyword)
+    if (!keyword.trim()) {
+      setGoals(allGoals)
+    } else {
+      const filtered = allGoals.filter(g =>
+        g.title.toLowerCase().includes(keyword.toLowerCase()) ||
+        (g.description || '').toLowerCase().includes(keyword.toLowerCase()) ||
+        (g.tags || []).some(t => t.toLowerCase().includes(keyword.toLowerCase()))
+      )
+      setGoals(filtered)
     }
-    try {
-      const results = await goalService.search(searchKeyword)
-      setGoals(results)
-    } catch (error) {
-      console.error('搜索失败:', error)
+  }
+
+  const handleSelectGoal = (goal: Goal) => {
+    if (hasUnsavedChanges) {
+      if (!confirm('有未保存的修改，确定要切换吗？')) return
+      setHasUnsavedChanges(false)
     }
+    setSelectedGoal(goal)
   }
 
   // 创建新目标
@@ -103,6 +121,8 @@ export default function HomePage({ showNewGoal, setShowNewGoal }: { showNewGoal:
       setShowNewGoal(false)
     } catch (error) {
       console.error('创建目标失败:', error)
+      showToast('创建目标失败，请重试', 'error')
+      loadData()
     }
   }
 
@@ -115,8 +135,10 @@ export default function HomePage({ showNewGoal, setShowNewGoal }: { showNewGoal:
     try {
       await goalService.update(goalId, data)
       clearCache('homeData')
+      setHasUnsavedChanges(false)
     } catch (error) {
       console.error('更新目标失败:', error)
+      showToast('更新目标失败，请重试', 'error')
       loadData()
     }
   }
@@ -132,6 +154,7 @@ export default function HomePage({ showNewGoal, setShowNewGoal }: { showNewGoal:
       clearCache('homeData')
     } catch (error) {
       console.error('删除目标失败:', error)
+      showToast('删除目标失败，请重试', 'error')
       loadData()
     }
   }
@@ -151,6 +174,7 @@ export default function HomePage({ showNewGoal, setShowNewGoal }: { showNewGoal:
       clearCache('homeData')
     } catch (error) {
       console.error('完成目标失败:', error)
+      showToast('完成目标失败，请重试', 'error')
       loadData()
     }
   }
@@ -184,6 +208,7 @@ export default function HomePage({ showNewGoal, setShowNewGoal }: { showNewGoal:
       clearCache('homeData')
     } catch (error) {
       console.error('撤销完成失败:', error)
+      showToast('撤销完成失败，请重试', 'error')
       loadData()
     }
   }
@@ -212,7 +237,7 @@ export default function HomePage({ showNewGoal, setShowNewGoal }: { showNewGoal:
         maxCount={settings?.key_goals_count || 5}
         onComplete={handleCompleteGoal}
         onUndoComplete={handleUndoComplete}
-        onSelect={setSelectedGoal}
+        onSelect={handleSelectGoal}
         onRefresh={loadData}
       />
 
@@ -225,16 +250,9 @@ export default function HomePage({ showNewGoal, setShowNewGoal }: { showNewGoal:
               type="text"
               placeholder="搜索目标..."
               value={searchKeyword}
-              onChange={(e) => setSearchKeyword(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+              onChange={(e) => handleSearchChange(e.target.value)}
               className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
             />
-            <button
-              onClick={handleSearch}
-              className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
-            >
-              搜索
-            </button>
           </div>
 
           {/* 文件夹列表 */}
@@ -245,32 +263,50 @@ export default function HomePage({ showNewGoal, setShowNewGoal }: { showNewGoal:
             selectedFolderId={selectedFolderId}
           />
 
+          {/* 今日概览 */}
+          <TodayOverview goals={filteredGoals} />
+
           {/* 目标树 - 全部目标 */}
           <GoalTree
             goals={filteredGoals}
             onComplete={handleCompleteGoal}
             onUndoComplete={handleUndoComplete}
-            onSelect={setSelectedGoal}
+            onSelect={handleSelectGoal}
             onRefresh={loadData}
           />
         </div>
 
-        {/* 右侧：目标详情 */}
-        <div className="lg:col-span-1">
-          {selectedGoal ? (
+        {/* Right side: Goal detail - Desktop */}
+        {selectedGoal && (
+          <div className="hidden lg:block lg:col-span-1">
             <GoalDetail
               goal={selectedGoal}
               folders={folders}
               onUpdate={(data) => handleUpdateGoal(selectedGoal.id!, data)}
               onDelete={() => handleDeleteGoal(selectedGoal.id!)}
               onClose={() => setSelectedGoal(null)}
+              onDirtyChange={setHasUnsavedChanges}
             />
-          ) : (
-            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 text-center text-gray-500">
-              选择一个目标查看详情
+          </div>
+        )}
+
+        {/* Goal detail - Mobile bottom sheet */}
+        {selectedGoal && (
+          <div className="lg:hidden fixed inset-x-0 bottom-0 z-40 bg-white dark:bg-gray-800 rounded-t-2xl shadow-2xl max-h-[70vh] overflow-y-auto p-4">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">目标详情</h3>
+              <button onClick={() => setSelectedGoal(null)} className="text-gray-400 hover:text-gray-600 text-xl">✕</button>
             </div>
-          )}
-        </div>
+            <GoalDetail
+              goal={selectedGoal}
+              folders={folders}
+              onUpdate={(data) => handleUpdateGoal(selectedGoal.id!, data)}
+              onDelete={() => handleDeleteGoal(selectedGoal.id!)}
+              onClose={() => setSelectedGoal(null)}
+              onDirtyChange={setHasUnsavedChanges}
+            />
+          </div>
+        )}
       </div>
 
       {/* 新建目标模态框 */}
@@ -280,6 +316,52 @@ export default function HomePage({ showNewGoal, setShowNewGoal }: { showNewGoal:
           onSubmit={handleCreateGoal}
           onClose={() => setShowNewGoal(false)}
         />
+      )}
+
+      {/* Mobile FAB */}
+      <button
+        onClick={() => setShowNewGoal(true)}
+        className="md:hidden fixed bottom-20 right-4 w-14 h-14 bg-blue-500 text-white rounded-full shadow-lg hover:bg-blue-600 flex items-center justify-center text-2xl z-40"
+      >
+        +
+      </button>
+    </div>
+  )
+}
+
+// 今日概览组件
+function TodayOverview({ goals }: { goals: Goal[] }) {
+  const today = new Date().toISOString().split('T')[0]
+  const overdueGoals = goals.filter(g =>
+    g.target_date && g.target_date.split('T')[0] < today && g.status !== 'completed' && !g.is_deleted
+  )
+  const todayDueGoals = goals.filter(g =>
+    g.target_date && g.target_date.split('T')[0] === today && g.status !== 'completed' && !g.is_deleted
+  )
+  const inProgressGoals = goals.filter(g =>
+    g.status === 'in_progress' && !g.is_deleted
+  )
+
+  if (overdueGoals.length === 0 && todayDueGoals.length === 0 && inProgressGoals.length === 0) {
+    return null
+  }
+
+  return (
+    <div className="flex flex-wrap gap-2 text-sm">
+      {overdueGoals.length > 0 && (
+        <span className="px-3 py-1 bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 rounded-full">
+          ⚠️ {overdueGoals.length} 个已超期
+        </span>
+      )}
+      {todayDueGoals.length > 0 && (
+        <span className="px-3 py-1 bg-yellow-100 dark:bg-yellow-900/30 text-yellow-600 dark:text-yellow-400 rounded-full">
+          📅 {todayDueGoals.length} 个今日截止
+        </span>
+      )}
+      {inProgressGoals.length > 0 && (
+        <span className="px-3 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-full">
+          ⏳ {inProgressGoals.length} 个进行中
+        </span>
       )}
     </div>
   )

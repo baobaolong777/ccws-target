@@ -204,6 +204,58 @@ export const goalService = {
       goal.title.toLowerCase().includes(keyword.toLowerCase()) ||
       goal.description.toLowerCase().includes(keyword.toLowerCase())
     )
+  },
+
+  // 移动目标顺序
+  async moveGoal(goalId: string, direction: 'up' | 'down') {
+    const userId = await getCurrentUserId()
+
+    // 获取当前目标
+    const { data: currentGoal, error: currentError } = await supabase
+      .from('goals')
+      .select('*')
+      .eq('id', goalId)
+      .single()
+
+    if (currentError) throw currentError
+
+    // 获取同级根目标（parent_id为null的）
+    const { data: siblings, error: siblingsError } = await supabase
+      .from('goals')
+      .select('*')
+      .eq('user_id', userId)
+      .eq('parent_id', currentGoal.parent_id)
+      .eq('is_deleted', false)
+      .order('order_index')
+
+    if (siblingsError) throw siblingsError
+
+    // 找到当前目标和相邻目标
+    const currentIndex = siblings.findIndex(g => g.id === goalId)
+    if (currentIndex === -1) throw new Error('找不到目标')
+
+    let targetIndex: number
+    if (direction === 'up') {
+      targetIndex = currentIndex - 1
+    } else {
+      targetIndex = currentIndex + 1
+    }
+
+    // 检查边界
+    if (targetIndex < 0 || targetIndex >= siblings.length) {
+      return // 已经在边界，不需要移动
+    }
+
+    // 交换 order_index
+    const targetGoal = siblings[targetIndex]
+    const currentOrderIndex = currentGoal.order_index
+    const targetOrderIndex = targetGoal.order_index
+
+    // 更新两个目标的 order_index
+    await Promise.all([
+      goalService.update(goalId, { order_index: targetOrderIndex }),
+      goalService.update(targetGoal.id!, { order_index: currentOrderIndex })
+    ])
   }
 }
 

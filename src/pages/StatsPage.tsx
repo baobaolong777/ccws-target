@@ -241,13 +241,6 @@ export default function StatsPage() {
                   key={goal.id}
                   className="flex items-center gap-3 p-3 bg-green-50 dark:bg-green-900/20 rounded-lg hover:bg-green-100 dark:hover:bg-green-900/30 transition-colors"
                 >
-                  <button
-                    onClick={() => handleUndoComplete(goal.id!)}
-                    className="w-5 h-5 rounded border-2 bg-green-500 border-green-500 flex items-center justify-center hover:bg-green-600 transition-colors"
-                    title="取消完成"
-                  >
-                    <span className="text-white text-xs">✓</span>
-                  </button>
                   <div className="flex-1">
                     <span className="font-medium text-gray-900 dark:text-white line-through">
                       {goal.title}

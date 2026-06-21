@@ -23,6 +23,11 @@ export default function Layout({ children, headerExtra }: LayoutProps) {
     { path: '/', label: '目标', icon: '📋' },
     { path: '/calendar', label: '日历', icon: '📅' },
     { path: '/stats', label: '统计', icon: '📊' },
+  ]
+
+  // Desktop sidebar keeps all items including Trash and Profile
+  const sidebarItems = [
+    ...navItems,
     { path: '/trash', label: '回收站', icon: '🗑️' },
     { path: '/profile', label: '我的', icon: '👤' },
   ]
@@ -77,7 +82,7 @@ export default function Layout({ children, headerExtra }: LayoutProps) {
       {/* 侧边栏 - 仅桌面端显示 */}
       <aside className="hidden md:block fixed left-0 top-16 bottom-0 w-64 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 p-4">
         <nav className="space-y-2">
-          {navItems.map((item) => (
+          {sidebarItems.map((item) => (
             <button
               key={item.path}
               onClick={() => navigate(item.path)}

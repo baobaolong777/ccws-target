@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Goal, goalService } from '../../lib/db'
+import ConfirmModal from '../ConfirmModal/ConfirmModal'
 
 interface DailyGoalsProps {
   onComplete: (goalId: string) => void
@@ -10,15 +11,26 @@ export default function DailyGoals({ onComplete, onUndoComplete }: DailyGoalsPro
   const [goals, setGoals] = useState<Goal[]>([])
   const [newTitle, setNewTitle] = useState('')
   const [loading, setLoading] = useState(true)
+  const [deleteGoalId, setDeleteGoalId] = useState<string | null>(null)
 
   useEffect(() => { loadGoals() }, [])
 
   const loadGoals = async () => {
     try {
       const allGoals = await goalService.getAll()
-      // 显示所有每日目标（不按日期过滤）
       const dailyGoals = allGoals.filter(g => g.is_daily)
-      setGoals(dailyGoals)
+      // Reset status if completed yesterday or earlier
+      const today = new Date().toISOString().split('T')[0]
+      const goalsWithReset = dailyGoals.map(g => {
+        if (g.status === 'completed' && g.completed_at) {
+          const completedDate = g.completed_at.split('T')[0]
+          if (completedDate !== today) {
+            return { ...g, status: 'pending' as const, completed_at: null }
+          }
+        }
+        return g
+      })
+      setGoals(goalsWithReset)
     } catch (error) {
       console.error('加载每日目标失败:', error)
     } finally {
@@ -72,10 +84,15 @@ export default function DailyGoals({ onComplete, onUndoComplete }: DailyGoalsPro
     onUndoComplete(goalId)
   }
 
-  const handleDelete = async (goalId: string) => {
-    if (!confirm('确定要删除这个每日目标吗？')) return
+  const handleDelete = (goalId: string) => {
+    setDeleteGoalId(goalId)
+  }
+
+  const confirmDelete = async () => {
+    if (!deleteGoalId) return
+    setDeleteGoalId(null)
     try {
-      await goalService.softDelete(goalId)
+      await goalService.softDelete(deleteGoalId)
       loadGoals()
     } catch (error) {
       console.error('删除失败:', error)
@@ -160,6 +177,18 @@ export default function DailyGoals({ onComplete, onUndoComplete }: DailyGoalsPro
             </div>
           ))}
         </div>
+      )}
+
+      {/* 确认删除弹窗 */}
+      {deleteGoalId && (
+        <ConfirmModal
+          title="删除每日目标"
+          message="确定要删除这个每日目标吗？"
+          confirmText="删除"
+          onConfirm={confirmDelete}
+          onCancel={() => setDeleteGoalId(null)}
+          danger
+        />
       )}
     </div>
   )

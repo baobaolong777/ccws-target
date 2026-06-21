@@ -3,6 +3,7 @@ import { Goal, Task, goalService, taskService } from '../../lib/db'
 
 import { format, differenceInDays } from 'date-fns'
 import GoalDetailModal from '../KeyGoals/GoalDetailModal'
+import ConfirmModal from '../ConfirmModal/ConfirmModal'
 
 interface GoalTreeNodeProps {
   goal: Goal
@@ -50,6 +51,7 @@ export default function GoalTreeNode({
   const [tasks, setTasks] = useState<Task[]>([])
   const [showTasks, setShowTasks] = useState(false)
   const [selectedGoalDetail, setSelectedGoalDetail] = useState<Goal | null>(null)
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
 
   const children = getChildren(goal.id!)
   const hasChildren = children.length > 0
@@ -216,7 +218,11 @@ export default function GoalTreeNode({
   }
 
   const handleDelete = async () => {
-    if (!confirm('确定要删除这个目标吗？')) return
+    setShowDeleteConfirm(true)
+  }
+
+  const confirmDelete = async () => {
+    setShowDeleteConfirm(false)
     try {
       await goalService.softDelete(goal.id!)
       onRefresh()
@@ -289,7 +295,7 @@ export default function GoalTreeNode({
                   onClick={(e) => { e.stopPropagation(); setShowTasks(!showTasks) }}
                   className="text-blue-500 hover:text-blue-600"
                 >
-                  {tasks.length} 个任务 {showTasks ? '▲' : '▼'}
+                  {tasks.filter(t => t.status === 'completed').length}/{tasks.length} 个任务 {showTasks ? '▲' : '▼'}
                 </button>
               )}
               {goal.tags && goal.tags.length > 0 && (
@@ -300,6 +306,14 @@ export default function GoalTreeNode({
                 </div>
               )}
             </div>
+            {tasks.length > 0 && (
+              <div className="w-full bg-gray-200 dark:bg-gray-600 rounded-full h-1 mt-2">
+                <div
+                  className="bg-green-500 h-1 rounded-full transition-all"
+                  style={{ width: `${Math.round((tasks.filter(t => t.status === 'completed').length / tasks.length) * 100)}%` }}
+                />
+              </div>
+            )}
           </div>
 
           <div className="relative">
@@ -557,6 +571,18 @@ export default function GoalTreeNode({
             </div>
           </div>
         </div>
+      )}
+
+      {/* 确认删除弹窗 */}
+      {showDeleteConfirm && (
+        <ConfirmModal
+          title="删除目标"
+          message="确定要删除这个目标吗？删除后可以在回收站恢复。"
+          confirmText="删除"
+          onConfirm={confirmDelete}
+          onCancel={() => setShowDeleteConfirm(false)}
+          danger
+        />
       )}
 
       {/* 目标详情弹窗 */}

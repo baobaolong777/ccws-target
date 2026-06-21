@@ -8,9 +8,10 @@ interface GoalDetailProps {
   onUpdate: (data: Partial<Goal>) => void
   onDelete: () => void
   onClose: () => void
+  onDirtyChange?: (dirty: boolean) => void
 }
 
-export default function GoalDetail({ goal, folders, onUpdate, onDelete, onClose }: GoalDetailProps) {
+export default function GoalDetail({ goal, folders, onUpdate, onDelete, onClose, onDirtyChange }: GoalDetailProps) {
   const [title, setTitle] = useState(goal.title)
   const [description, setDescription] = useState(goal.description)
   const [status, setStatus] = useState(goal.status)
@@ -63,7 +64,10 @@ export default function GoalDetail({ goal, folders, onUpdate, onDelete, onClose 
       is_key_goal: isKeyGoal,
       repeat_rule: repeatRule
     })
+    onDirtyChange?.(false)
   }
+
+  const markDirty = () => onDirtyChange?.(true)
 
   return (
     <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
@@ -88,7 +92,7 @@ export default function GoalDetail({ goal, folders, onUpdate, onDelete, onClose 
           <input
             type="text"
             value={title}
-            onChange={(e) => setTitle(e.target.value)}
+            onChange={(e) => { setTitle(e.target.value); markDirty() }}
             className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
           />
         </div>
@@ -100,7 +104,7 @@ export default function GoalDetail({ goal, folders, onUpdate, onDelete, onClose 
           </label>
           <textarea
             value={description}
-            onChange={(e) => setDescription(e.target.value)}
+            onChange={(e) => { setDescription(e.target.value); markDirty() }}
             rows={3}
             className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
           />
@@ -114,7 +118,7 @@ export default function GoalDetail({ goal, folders, onUpdate, onDelete, onClose 
             </label>
             <select
               value={status}
-              onChange={(e) => setStatus(e.target.value as any)}
+              onChange={(e) => { setStatus(e.target.value as any); markDirty() }}
               className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
             >
               <option value="pending">待完成</option>
@@ -130,7 +134,7 @@ export default function GoalDetail({ goal, folders, onUpdate, onDelete, onClose 
             </label>
             <select
               value={priority}
-              onChange={(e) => setPriority(e.target.value as any)}
+              onChange={(e) => { setPriority(e.target.value as any); markDirty() }}
               className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
             >
               <option value="high">高</option>
@@ -148,7 +152,7 @@ export default function GoalDetail({ goal, folders, onUpdate, onDelete, onClose 
           <input
             type="date"
             value={startDate}
-            onChange={(e) => setStartDate(e.target.value)}
+            onChange={(e) => { setStartDate(e.target.value); markDirty() }}
             className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
           />
         </div>
@@ -161,7 +165,7 @@ export default function GoalDetail({ goal, folders, onUpdate, onDelete, onClose 
           <input
             type="date"
             value={targetDate}
-            onChange={(e) => setTargetDate(e.target.value)}
+            onChange={(e) => { setTargetDate(e.target.value); markDirty() }}
             className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
           />
         </div>
@@ -173,7 +177,7 @@ export default function GoalDetail({ goal, folders, onUpdate, onDelete, onClose 
           </label>
           <select
             value={folderId}
-            onChange={(e) => setFolderId(e.target.value)}
+            onChange={(e) => { setFolderId(e.target.value); markDirty() }}
             className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
           >
             <option value="">无</option>
@@ -193,7 +197,7 @@ export default function GoalDetail({ goal, folders, onUpdate, onDelete, onClose 
           <input
             type="text"
             value={tags}
-            onChange={(e) => setTags(e.target.value)}
+            onChange={(e) => { setTags(e.target.value); markDirty() }}
             placeholder="工作, 学习, 生活"
             className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
           />
@@ -207,7 +211,7 @@ export default function GoalDetail({ goal, folders, onUpdate, onDelete, onClose 
           <div className="flex gap-2">
             <select
               value={repeatType}
-              onChange={(e) => setRepeatType(e.target.value as 'daily' | 'weekly' | 'monthly' | 'none')}
+              onChange={(e) => { setRepeatType(e.target.value as 'daily' | 'weekly' | 'monthly' | 'none'); markDirty() }}
               className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
             >
               <option value="none">不重复</option>
@@ -220,7 +224,7 @@ export default function GoalDetail({ goal, folders, onUpdate, onDelete, onClose 
                 type="number"
                 min="1"
                 value={repeatInterval}
-                onChange={(e) => setRepeatInterval(parseInt(e.target.value) || 1)}
+                onChange={(e) => { setRepeatInterval(parseInt(e.target.value) || 1); markDirty() }}
                 className="w-20 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
               />
             )}
@@ -233,7 +237,7 @@ export default function GoalDetail({ goal, folders, onUpdate, onDelete, onClose 
             type="checkbox"
             id="isKeyGoal"
             checked={isKeyGoal}
-            onChange={(e) => setIsKeyGoal(e.target.checked)}
+            onChange={(e) => { setIsKeyGoal(e.target.checked); markDirty() }}
             className="w-4 h-4 text-blue-500 border-gray-300 rounded focus:ring-blue-500"
           />
           <label htmlFor="isKeyGoal" className="text-sm text-gray-700 dark:text-gray-300">

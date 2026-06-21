@@ -8,6 +8,7 @@ import StatsPage from './pages/StatsPage'
 import TrashPage from './pages/TrashPage'
 import ProfilePage from './pages/ProfilePage'
 import Layout from './components/Layout'
+import { ToastProvider } from './components/Toast/Toast'
 
 function App() {
   const [user, setUser] = useState<any>(null)
@@ -53,7 +54,9 @@ function App() {
 
   return (
     <Router>
-      <AppContent showNewGoal={showNewGoal} setShowNewGoal={setShowNewGoal} />
+      <ToastProvider>
+        <AppContent showNewGoal={showNewGoal} setShowNewGoal={setShowNewGoal} />
+      </ToastProvider>
     </Router>
   )
 }

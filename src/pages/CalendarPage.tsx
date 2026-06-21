@@ -178,7 +178,7 @@ export default function CalendarPage() {
                 <button
                   key={day.toISOString()}
                   onClick={() => setSelectedDate(day)}
-                  className={`aspect-square p-1 rounded-lg relative flex flex-col items-center justify-center transition-colors ${
+                  className={`p-1.5 sm:p-1 rounded-lg relative flex flex-col items-center justify-center min-h-[44px] sm:min-h-0 sm:aspect-square transition-colors ${
                     isSelected
                       ? 'bg-blue-500 text-white'
                       : isTodayDate
@@ -187,10 +187,10 @@ export default function CalendarPage() {
                   }`}
                 >
                   <span className="text-sm">{format(day, 'd')}</span>
-                  <div className="flex gap-0.5 mt-0.5">
-                    {hasRegularGoals && <div className="w-1.5 h-1.5 rounded-full bg-blue-500" />}
-                    {hasDailyGoals && <div className="w-1.5 h-1.5 rounded-full bg-orange-500" />}
-                    {hasTasks && <div className="w-1.5 h-1.5 rounded-full bg-green-500" />}
+                  <div className="flex gap-0.5 sm:gap-0.5 mt-0.5">
+                    {hasGoals && <div className="w-2 h-2 sm:w-1.5 sm:h-1.5 rounded-full bg-blue-500" />}
+                    {hasTasks && <div className="w-2 h-2 sm:w-1.5 sm:h-1.5 rounded-full bg-green-500" />}
+                    {hasDailyGoals && <div className="w-2 h-2 sm:w-1.5 sm:h-1.5 rounded-full bg-orange-500" />}
                   </div>
                 </button>
               )

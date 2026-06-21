@@ -12,6 +12,7 @@ interface GoalTreeProps {
 
 export default function GoalTree({ goals, onComplete, onUndoComplete, onSelect, onRefresh }: GoalTreeProps) {
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set())
+  const [reordering, setReordering] = useState(false)
 
   // 全部目标显示：未完成的 + 今天完成的（保留一天）
   const today = new Date()
@@ -48,6 +49,19 @@ export default function GoalTree({ goals, onComplete, onUndoComplete, onSelect, 
     return activeGoals.filter(goal => goal.parent_id === parentId)
   }
 
+  // 移动目标顺序
+  const handleMoveGoal = async (goalId: string, direction: 'up' | 'down') => {
+    setReordering(true)
+    try {
+      await goalService.moveGoal(goalId, direction)
+      await onRefresh()
+    } catch (error) {
+      console.error('移动目标失败:', error)
+    } finally {
+      setReordering(false)
+    }
+  }
+
   return (
     <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4">
       <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
@@ -62,20 +76,42 @@ export default function GoalTree({ goals, onComplete, onUndoComplete, onSelect, 
         </div>
       ) : (
         <div className="space-y-2">
-          {rootGoals.map((goal) => (
-            <GoalTreeNode
-              key={goal.id}
-              goal={goal}
-              goals={activeGoals}
-              expandedIds={expandedIds}
-              onToggleExpand={toggleExpand}
-              onComplete={onComplete}
-              onUndoComplete={onUndoComplete}
-              onSelect={onSelect}
-              onRefresh={onRefresh}
-              getChildren={getChildren}
-              level={0}
-            />
+          {rootGoals.map((goal, index) => (
+            <div key={goal.id} className="flex items-start gap-2">
+              {/* 移动按钮 */}
+              <div className="flex flex-col gap-1 pt-2">
+                <button
+                  onClick={() => handleMoveGoal(goal.id!, 'up')}
+                  disabled={index === 0 || reordering}
+                  className="w-6 h-6 flex items-center justify-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors"
+                  title="上移"
+                >
+                  ↑
+                </button>
+                <button
+                  onClick={() => handleMoveGoal(goal.id!, 'down')}
+                  disabled={index === rootGoals.length - 1 || reordering}
+                  className="w-6 h-6 flex items-center justify-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors"
+                  title="下移"
+                >
+                  ↓
+                </button>
+              </div>
+              <div className="flex-1">
+                <GoalTreeNode
+                  goal={goal}
+                  goals={activeGoals}
+                  expandedIds={expandedIds}
+                  onToggleExpand={toggleExpand}
+                  onComplete={onComplete}
+                  onUndoComplete={onUndoComplete}
+                  onSelect={onSelect}
+                  onRefresh={onRefresh}
+                  getChildren={getChildren}
+                  level={0}
+                />
+              </div>
+            </div>
           ))}
         </div>
       )}
