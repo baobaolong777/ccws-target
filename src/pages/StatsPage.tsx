@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { goalService, Goal } from '../lib/db'
+import { getCached, setCache } from '../lib/cache'
 import { format, startOfWeek, endOfWeek, startOfMonth, endOfMonth, isWithinInterval } from 'date-fns'
 
 export default function StatsPage() {
@@ -12,8 +13,17 @@ export default function StatsPage() {
 
   const loadGoals = async () => {
     try {
+      // Check cache first
+      const cached = getCached<Goal[]>('statsGoals')
+      if (cached) {
+        setGoals(cached)
+        setLoading(false)
+        return
+      }
+
       const allGoals = await goalService.getAll()
       setGoals(allGoals)
+      setCache('statsGoals', allGoals)
     } catch (error) {
       console.error('加载目标失败:', error)
     } finally {

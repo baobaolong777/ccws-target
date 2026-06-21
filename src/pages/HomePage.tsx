@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { goalService, folderService, Goal, settingsService, UserSettings } from '../lib/db'
+import { getCached, setCache, clearCache } from '../lib/cache'
 import KeyGoalsPanel from '../components/KeyGoals/KeyGoalsPanel'
 import GoalTree from '../components/GoalTree/GoalTree'
 import GoalDetail from '../components/GoalDetail/GoalDetail'
@@ -24,6 +25,18 @@ export default function HomePage({ showNewGoal, setShowNewGoal }: { showNewGoal:
 
   const loadData = async () => {
     try {
+      // Check cache first
+      const cached = getCached<{ goals: Goal[]; folders: any[]; settings: UserSettings }>('homeData')
+      if (cached) {
+        setAllGoals(cached.goals)
+        setGoals(cached.goals)
+        setFolders(cached.folders)
+        setSettings(cached.settings)
+        setKeyGoals(cached.goals.filter(g => g.is_key_goal && g.status !== 'completed').slice(0, cached.settings?.key_goals_count || 5))
+        setLoading(false)
+        return
+      }
+
       const [goalsData, foldersData, settingsData] = await Promise.all([
         goalService.getAll(),
         folderService.getAll(),
@@ -38,6 +51,9 @@ export default function HomePage({ showNewGoal, setShowNewGoal }: { showNewGoal:
       // 加载重点目标
       const keyGoalsData = await goalService.getKeyGoals(settingsData.key_goals_count)
       setKeyGoals(keyGoalsData)
+
+      // Cache the data
+      setCache('homeData', { goals: goalsData, folders: foldersData, settings: settingsData })
     } catch (error) {
       console.error('加载数据失败:', error)
     } finally {
@@ -82,6 +98,7 @@ export default function HomePage({ showNewGoal, setShowNewGoal }: { showNewGoal:
         deleted_at: null,
         repeat_rule: goalData.repeat_rule || null
       })
+      clearCache('homeData')
       await loadData()
       setShowNewGoal(false)
     } catch (error) {
@@ -97,6 +114,7 @@ export default function HomePage({ showNewGoal, setShowNewGoal }: { showNewGoal:
     setSelectedGoal(null)
     try {
       await goalService.update(goalId, data)
+      clearCache('homeData')
     } catch (error) {
       console.error('更新目标失败:', error)
       loadData()
@@ -111,6 +129,7 @@ export default function HomePage({ showNewGoal, setShowNewGoal }: { showNewGoal:
     setSelectedGoal(null)
     try {
       await goalService.softDelete(goalId)
+      clearCache('homeData')
     } catch (error) {
       console.error('删除目标失败:', error)
       loadData()
@@ -129,6 +148,7 @@ export default function HomePage({ showNewGoal, setShowNewGoal }: { showNewGoal:
         status: 'completed',
         completed_at: new Date().toISOString()
       })
+      clearCache('homeData')
     } catch (error) {
       console.error('完成目标失败:', error)
       loadData()
@@ -161,6 +181,7 @@ export default function HomePage({ showNewGoal, setShowNewGoal }: { showNewGoal:
         status: 'pending',
         completed_at: null
       })
+      clearCache('homeData')
     } catch (error) {
       console.error('撤销完成失败:', error)
       loadData()

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { goalService, taskService, Goal, Task } from '../lib/db'
+import { getCached, setCache } from '../lib/cache'
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, isToday, addMonths, subMonths, startOfWeek, endOfWeek } from 'date-fns'
 import { zhCN } from 'date-fns/locale'
 import GoalDetailModal from '../components/KeyGoals/GoalDetailModal'
@@ -19,6 +20,15 @@ export default function CalendarPage() {
 
   const loadData = async () => {
     try {
+      // Check cache first
+      const cached = getCached<{ goals: Goal[]; tasks: any[] }>('calendarData')
+      if (cached) {
+        setGoals(cached.goals)
+        setTasks(cached.tasks)
+        setLoading(false)
+        return
+      }
+
       const goalsData = await goalService.getAll()
       setGoals(goalsData)
       // Load tasks for all goals in parallel
@@ -29,7 +39,11 @@ export default function CalendarPage() {
             .catch(() => [])
         )
       )
-      setTasks(allTasksResults.flat() as Task[])
+      const allTasks = allTasksResults.flat() as Task[]
+      setTasks(allTasks)
+
+      // Cache the data
+      setCache('calendarData', { goals: goalsData, tasks: allTasks })
     } catch (error) {
       console.error('加载数据失败:', error)
     } finally {
