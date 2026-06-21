@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Goal, Task, goalService, taskService } from '../../lib/db'
 import { format, differenceInDays } from 'date-fns'
+import GoalDetailModal from '../KeyGoals/GoalDetailModal'
 
 interface GoalTreeNodeProps {
   goal: Goal
@@ -40,6 +41,7 @@ export default function GoalTreeNode({
   const [taskDueDate, setTaskDueDate] = useState('')
   const [tasks, setTasks] = useState<Task[]>([])
   const [showTasks, setShowTasks] = useState(false)
+  const [selectedGoalDetail, setSelectedGoalDetail] = useState<Goal | null>(null)
 
   const children = getChildren(goal.id!)
   const hasChildren = children.length > 0
@@ -188,7 +190,7 @@ export default function GoalTreeNode({
     <div style={{ marginLeft: level * 24 }}>
       <div
         className={`p-3 rounded-lg border cursor-pointer ${getStatusStyle()}`}
-        onClick={() => onSelect(goal)}
+        onClick={() => setSelectedGoalDetail(goal)}
       >
         <div className="flex items-start gap-3">
           {hasChildren ? (
@@ -448,6 +450,11 @@ export default function GoalTreeNode({
             </div>
           </div>
         </div>
+      )}
+
+      {/* 目标详情弹窗 */}
+      {selectedGoalDetail && (
+        <GoalDetailModal goal={selectedGoalDetail} onClose={() => setSelectedGoalDetail(null)} />
       )}
     </div>
   )
