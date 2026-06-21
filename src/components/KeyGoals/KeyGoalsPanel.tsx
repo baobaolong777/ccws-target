@@ -12,8 +12,8 @@ interface KeyGoalsPanelProps {
 export default function KeyGoalsPanel({ goals, maxCount, onComplete, onUndoComplete, onSelect }: KeyGoalsPanelProps) {
   // 计算倒计时
   const getDaysRemaining = (goal: Goal) => {
-    if (!goal.targetDate) return null
-    const targetDate = goal.targetDate.toDate()
+    if (!goal.target_date) return null
+    const targetDate = new Date(goal.target_date)
     return differenceInDays(targetDate, new Date())
   }
 

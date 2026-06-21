@@ -34,8 +34,8 @@ export default function GoalTreeNode({
 
   // 计算倒计时
   const getDaysRemaining = () => {
-    if (!goal.targetDate) return null
-    const targetDate = goal.targetDate.toDate()
+    if (!goal.target_date) return null
+    const targetDate = new Date(goal.target_date)
     const days = differenceInDays(targetDate, new Date())
     return days
   }
@@ -74,18 +74,18 @@ export default function GoalTreeNode({
         description: '',
         status: 'pending',
         priority: 'medium',
-        isKeyGoal: false,
+        is_key_goal: false,
         tags: [],
-        folderId: goal.folderId || null,
-        parentId: goal.id || null,
-        orderIndex: children.length,
-        timeSpent: 0,
-        reminderAt: null,
-        isDeleted: false,
-        deletedAt: null,
-        repeatRule: null,
-        targetDate: null,
-        completedAt: null
+        folder_id: goal.folder_id || null,
+        parent_id: goal.id || null,
+        order_index: children.length,
+        time_spent: 0,
+        reminder_at: null,
+        is_deleted: false,
+        deleted_at: null,
+        repeat_rule: null,
+        target_date: null,
+        completed_at: null
       })
       onRefresh()
       if (!isExpanded) {
@@ -99,7 +99,7 @@ export default function GoalTreeNode({
   // 切换重点状态
   const handleToggleKeyGoal = async () => {
     try {
-      await goalService.update(goal.id!, { isKeyGoal: !goal.isKeyGoal })
+      await goalService.update(goal.id!, { is_key_goal: !goal.is_key_goal })
       onRefresh()
     } catch (error) {
       console.error('更新失败:', error)
@@ -176,7 +176,7 @@ export default function GoalTreeNode({
               </h4>
 
               {/* 重点标记 */}
-              {goal.isKeyGoal && (
+              {goal.is_key_goal && (
                 <span className="text-yellow-500">⭐</span>
               )}
             </div>
@@ -260,7 +260,7 @@ export default function GoalTreeNode({
                   }}
                   className="w-full px-3 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-600"
                 >
-                  {goal.isKeyGoal ? '取消重点' : '设为重点'}
+                  {goal.is_key_goal ? '取消重点' : '设为重点'}
                 </button>
                 <button
                   onClick={(e) => {

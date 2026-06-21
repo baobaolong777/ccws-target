@@ -1,15 +1,22 @@
 import { useState, useEffect } from 'react'
-import { auth } from '../lib/firebase'
+import { supabase } from '../lib/supabase'
 import { settingsService, exportService, UserSettings } from '../lib/db'
 
 export default function ProfilePage() {
+  const [user, setUser] = useState<any>(null)
   const [settings, setSettings] = useState<UserSettings | null>(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
 
   useEffect(() => {
+    loadUser()
     loadSettings()
   }, [])
+
+  const loadUser = async () => {
+    const { data: { user } } = await supabase.auth.getUser()
+    setUser(user)
+  }
 
   const loadSettings = async () => {
     try {
@@ -77,13 +84,13 @@ export default function ProfilePage() {
           <div className="flex items-center justify-between">
             <span className="text-gray-600 dark:text-gray-400">邮箱</span>
             <span className="text-gray-900 dark:text-white">
-              {auth.currentUser?.email || '未登录'}
+              {user?.email || '未登录'}
             </span>
           </div>
           <div className="flex items-center justify-between">
             <span className="text-gray-600 dark:text-gray-400">用户ID</span>
             <span className="text-gray-900 dark:text-white text-sm font-mono">
-              {auth.currentUser?.uid?.substring(0, 16)}...
+              {user?.id?.substring(0, 16)}...
             </span>
           </div>
         </div>
@@ -104,13 +111,13 @@ export default function ProfilePage() {
                 type="range"
                 min="1"
                 max="10"
-                value={settings?.keyGoalsCount || 5}
-                onChange={(e) => handleUpdateSettings({ keyGoalsCount: parseInt(e.target.value) })}
+                value={settings?.key_goals_count || 5}
+                onChange={(e) => handleUpdateSettings({ key_goals_count: parseInt(e.target.value) })}
                 className="flex-1"
                 disabled={saving}
               />
               <span className="w-8 text-center text-gray-900 dark:text-white font-medium">
-                {settings?.keyGoalsCount || 5}
+                {settings?.key_goals_count || 5}
               </span>
             </div>
             <p className="text-sm text-gray-500 mt-1">
@@ -147,16 +154,16 @@ export default function ProfilePage() {
             </div>
             <button
               onClick={() => handleUpdateSettings({
-                reminderEnabled: !settings?.reminderEnabled
+                reminder_enabled: !settings?.reminder_enabled
               })}
               className={`relative w-12 h-6 rounded-full transition-colors ${
-                settings?.reminderEnabled ? 'bg-blue-500' : 'bg-gray-300'
+                settings?.reminder_enabled ? 'bg-blue-500' : 'bg-gray-300'
               }`}
               disabled={saving}
             >
               <div
                 className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-transform ${
-                  settings?.reminderEnabled ? 'left-7' : 'left-1'
+                  settings?.reminder_enabled ? 'left-7' : 'left-1'
                 }`}
               />
             </button>

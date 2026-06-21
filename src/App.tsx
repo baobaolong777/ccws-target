@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react'
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
-import { onAuthStateChanged, User } from 'firebase/auth'
-import { auth } from './lib/firebase'
+import { supabase } from './lib/supabase'
 import AuthForm from './components/Auth/AuthForm'
 import HomePage from './pages/HomePage'
 import CalendarPage from './pages/CalendarPage'
@@ -11,16 +10,22 @@ import ProfilePage from './pages/ProfilePage'
 import Layout from './components/Layout'
 
 function App() {
-  const [user, setUser] = useState<User | null>(null)
+  const [user, setUser] = useState<any>(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setUser(user)
+    // 获取初始会话
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null)
       setLoading(false)
     })
 
-    return () => unsubscribe()
+    // 监听登录状态变化
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null)
+    })
+
+    return () => subscription.unsubscribe()
   }, [])
 
   if (loading) {

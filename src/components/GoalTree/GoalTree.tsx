@@ -14,7 +14,7 @@ export default function GoalTree({ goals, onComplete, onUndoComplete, onSelect, 
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set())
 
   // 获取根目标（没有父目标的）
-  const rootGoals = goals.filter(goal => !goal.parentId)
+  const rootGoals = goals.filter(goal => !goal.parent_id)
 
   // 切换展开/折叠
   const toggleExpand = (goalId: string) => {
@@ -31,7 +31,7 @@ export default function GoalTree({ goals, onComplete, onUndoComplete, onSelect, 
 
   // 获取子目标
   const getChildren = (parentId: string) => {
-    return goals.filter(goal => goal.parentId === parentId)
+    return goals.filter(goal => goal.parent_id === parentId)
   }
 
   return (

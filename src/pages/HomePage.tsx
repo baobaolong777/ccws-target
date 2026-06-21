@@ -34,7 +34,7 @@ export default function HomePage() {
       setSettings(settingsData)
 
       // 加载重点目标
-      const keyGoalsData = await goalService.getKeyGoals(settingsData.keyGoalsCount)
+      const keyGoalsData = await goalService.getKeyGoals(settingsData.key_goals_count)
       setKeyGoals(keyGoalsData)
     } catch (error) {
       console.error('加载数据失败:', error)
@@ -65,18 +65,18 @@ export default function HomePage() {
         description: goalData.description || '',
         status: goalData.status || 'pending',
         priority: goalData.priority || 'medium',
-        isKeyGoal: goalData.isKeyGoal || false,
+        is_key_goal: goalData.is_key_goal || false,
         tags: goalData.tags || [],
-        folderId: goalData.folderId || null,
-        parentId: goalData.parentId || null,
-        targetDate: goalData.targetDate || null,
-        completedAt: null,
-        orderIndex: goals.length,
-        timeSpent: 0,
-        reminderAt: null,
-        isDeleted: false,
-        deletedAt: null,
-        repeatRule: goalData.repeatRule || null
+        folder_id: goalData.folder_id || null,
+        parent_id: goalData.parent_id || null,
+        target_date: goalData.target_date || null,
+        completed_at: null,
+        order_index: goals.length,
+        time_spent: 0,
+        reminder_at: null,
+        is_deleted: false,
+        deleted_at: null,
+        repeat_rule: goalData.repeat_rule || null
       })
       await loadData()
       setShowNewGoal(false)
@@ -112,7 +112,7 @@ export default function HomePage() {
     try {
       await goalService.update(goalId, {
         status: 'completed',
-        completedAt: new Date() as any
+        completed_at: new Date() as any
       })
       await loadData()
     } catch (error) {
@@ -125,7 +125,7 @@ export default function HomePage() {
     try {
       await goalService.update(goalId, {
         status: 'pending',
-        completedAt: null
+        completed_at: null
       })
       await loadData()
     } catch (error) {
@@ -135,7 +135,7 @@ export default function HomePage() {
 
   // 按文件夹筛选目标
   const filteredGoals = selectedFolderId
-    ? goals.filter(g => g.folderId === selectedFolderId)
+    ? goals.filter(g => g.folder_id === selectedFolderId)
     : goals
 
   if (loading) {
@@ -175,7 +175,7 @@ export default function HomePage() {
       {/* 重点目标 */}
       <KeyGoalsPanel
         goals={keyGoals}
-        maxCount={settings?.keyGoalsCount || 5}
+        maxCount={settings?.key_goals_count || 5}
         onComplete={handleCompleteGoal}
         onUndoComplete={handleUndoComplete}
         onSelect={setSelectedGoal}
@@ -251,9 +251,9 @@ function NewGoalModal({ folders, onSubmit, onClose }: {
       title,
       description,
       priority,
-      targetDate: targetDate ? new Date(targetDate) as any : null,
-      folderId,
-      isKeyGoal
+      target_date: targetDate ? new Date(targetDate) as any : null,
+      folder_id: folderId,
+      is_key_goal: isKeyGoal
     })
   }
 

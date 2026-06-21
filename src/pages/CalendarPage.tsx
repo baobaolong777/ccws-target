@@ -32,8 +32,8 @@ export default function CalendarPage() {
   // 获取指定日期的目标
   const getGoalsForDate = (date: Date) => {
     return goals.filter(goal => {
-      if (!goal.targetDate) return false
-      const goalDate = goal.targetDate.toDate()
+      if (!goal.target_date) return false
+      const goalDate = new Date(goal.target_date)
       return isSameDay(goalDate, date)
     })
   }

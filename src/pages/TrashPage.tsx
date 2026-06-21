@@ -107,7 +107,7 @@ export default function TrashPage() {
                     </p>
                   )}
                   <p className="text-xs text-gray-400 mt-2">
-                    删除于 {goal.deletedAt ? format(goal.deletedAt.toDate(), 'yyyy-MM-dd HH:mm') : '未知'}
+                    删除于 {goal.deleted_at ? format(new Date(goal.deleted_at), 'yyyy-MM-dd HH:mm') : '未知'}
                   </p>
                 </div>
 

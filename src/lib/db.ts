@@ -1,312 +1,328 @@
-import {
-  collection,
-  addDoc,
-  updateDoc,
-  deleteDoc,
-  doc,
-  query,
-  where,
-  orderBy,
-  getDocs,
-  getDoc,
-  serverTimestamp,
-  Timestamp
-} from 'firebase/firestore'
-import { db, auth } from './firebase'
+import { supabase } from './supabase'
 
 // 类型定义
 export interface Goal {
   id?: string
-  userId: string
+  user_id: string
   title: string
   description: string
   status: 'pending' | 'in_progress' | 'completed' | 'cancelled'
   priority: 'high' | 'medium' | 'low'
-  isKeyGoal: boolean
+  is_key_goal: boolean
   tags: string[]
-  folderId: string | null
-  createdAt: Timestamp
-  updatedAt: Timestamp
-  targetDate: Timestamp | null
-  completedAt: Timestamp | null
-  parentId: string | null
-  orderIndex: number
-  timeSpent: number
-  reminderAt: Timestamp | null
-  isDeleted: boolean
-  deletedAt: Timestamp | null
-  repeatRule: RepeatRule | null
+  folder_id: string | null
+  created_at: string
+  updated_at: string
+  target_date: string | null
+  completed_at: string | null
+  parent_id: string | null
+  order_index: number
+  time_spent: number
+  reminder_at: string | null
+  is_deleted: boolean
+  deleted_at: string | null
+  repeat_rule: RepeatRule | null
 }
 
 export interface RepeatRule {
   type: 'daily' | 'weekly' | 'monthly' | 'none'
   interval: number
-  daysOfWeek: string[]
-  endDate: Timestamp | null
+  days_of_week: string[]
+  end_date: string | null
 }
 
 export interface Folder {
   id?: string
-  userId: string
+  user_id: string
   name: string
   color: string
-  createdAt: Timestamp
-  orderIndex: number
+  created_at: string
+  order_index: number
 }
 
 export interface UserSettings {
   id?: string
-  userId: string
-  keyGoalsCount: number
+  user_id: string
+  key_goals_count: number
   theme: 'light' | 'dark'
-  reminderEnabled: boolean
+  reminder_enabled: boolean
 }
 
 // 获取当前用户ID
-const getCurrentUserId = (): string => {
-  const user = auth.currentUser
+const getCurrentUserId = async (): Promise<string> => {
+  const { data: { user } } = await supabase.auth.getUser()
   if (!user) throw new Error('用户未登录')
-  return user.uid
+  return user.id
 }
 
 // 目标操作
 export const goalService = {
   // 创建目标
-  async create(goal: Omit<Goal, 'id' | 'userId' | 'createdAt' | 'updatedAt'>) {
-    const userId = getCurrentUserId()
-    const docRef = await addDoc(collection(db, 'goals'), {
-      ...goal,
-      userId,
-      createdAt: serverTimestamp(),
-      updatedAt: serverTimestamp()
-    })
-    return docRef.id
+  async create(goal: Omit<Goal, 'id' | 'user_id' | 'created_at' | 'updated_at'>) {
+    const userId = await getCurrentUserId()
+    const { data, error } = await supabase
+      .from('goals')
+      .insert({
+        ...goal,
+        user_id: userId,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      })
+      .select()
+      .single()
+
+    if (error) throw error
+    return data.id
   },
 
   // 更新目标
   async update(goalId: string, data: Partial<Goal>) {
-    const docRef = doc(db, 'goals', goalId)
-    await updateDoc(docRef, {
-      ...data,
-      updatedAt: serverTimestamp()
-    })
+    const { error } = await supabase
+      .from('goals')
+      .update({
+        ...data,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', goalId)
+
+    if (error) throw error
   },
 
   // 删除目标（移到回收站）
   async softDelete(goalId: string) {
-    const docRef = doc(db, 'goals', goalId)
-    await updateDoc(docRef, {
-      isDeleted: true,
-      deletedAt: serverTimestamp()
-    })
+    const { error } = await supabase
+      .from('goals')
+      .update({
+        is_deleted: true,
+        deleted_at: new Date().toISOString()
+      })
+      .eq('id', goalId)
+
+    if (error) throw error
   },
 
   // 永久删除目标
   async hardDelete(goalId: string) {
-    const docRef = doc(db, 'goals', goalId)
-    await deleteDoc(docRef)
+    const { error } = await supabase
+      .from('goals')
+      .delete()
+      .eq('id', goalId)
+
+    if (error) throw error
   },
 
   // 恢复目标
   async restore(goalId: string) {
-    const docRef = doc(db, 'goals', goalId)
-    await updateDoc(docRef, {
-      isDeleted: false,
-      deletedAt: null
-    })
+    const { error } = await supabase
+      .from('goals')
+      .update({
+        is_deleted: false,
+        deleted_at: null
+      })
+      .eq('id', goalId)
+
+    if (error) throw error
   },
 
   // 获取用户所有目标
   async getAll() {
-    const userId = getCurrentUserId()
-    const q = query(
-      collection(db, 'goals'),
-      where('userId', '==', userId),
-      where('isDeleted', '==', false)
-    )
-    const snapshot = await getDocs(q)
-    return snapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data()
-    })) as Goal[]
+    const userId = await getCurrentUserId()
+    const { data, error } = await supabase
+      .from('goals')
+      .select('*')
+      .eq('user_id', userId)
+      .eq('is_deleted', false)
+
+    if (error) throw error
+    return data as Goal[]
   },
 
   // 获取重点目标
   async getKeyGoals(limit: number = 5) {
-    const userId = getCurrentUserId()
-    const q = query(
-      collection(db, 'goals'),
-      where('userId', '==', userId),
-      where('isKeyGoal', '==', true),
-      where('isDeleted', '==', false)
-    )
-    const snapshot = await getDocs(q)
-    return snapshot.docs.slice(0, limit).map(doc => ({
-      id: doc.id,
-      ...doc.data()
-    })) as Goal[]
+    const userId = await getCurrentUserId()
+    const { data, error } = await supabase
+      .from('goals')
+      .select('*')
+      .eq('user_id', userId)
+      .eq('is_key_goal', true)
+      .eq('is_deleted', false)
+      .neq('status', 'completed')
+      .limit(limit)
+
+    if (error) throw error
+    return data as Goal[]
   },
 
   // 获取回收站目标
   async getDeleted() {
-    const userId = getCurrentUserId()
-    const q = query(
-      collection(db, 'goals'),
-      where('userId', '==', userId),
-      where('isDeleted', '==', true)
-    )
-    const snapshot = await getDocs(q)
-    return snapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data()
-    })) as Goal[]
+    const userId = await getCurrentUserId()
+    const { data, error } = await supabase
+      .from('goals')
+      .select('*')
+      .eq('user_id', userId)
+      .eq('is_deleted', true)
+      .order('deleted_at', { ascending: false })
+
+    if (error) throw error
+    return data as Goal[]
   },
 
   // 获取子目标
   async getChildren(parentId: string) {
-    const userId = getCurrentUserId()
-    const q = query(
-      collection(db, 'goals'),
-      where('userId', '==', userId),
-      where('parentId', '==', parentId),
-      where('isDeleted', '==', false)
-    )
-    const snapshot = await getDocs(q)
-    return snapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data()
-    })) as Goal[]
+    const userId = await getCurrentUserId()
+    const { data, error } = await supabase
+      .from('goals')
+      .select('*')
+      .eq('user_id', userId)
+      .eq('parent_id', parentId)
+      .eq('is_deleted', false)
+
+    if (error) throw error
+    return data as Goal[]
   },
 
   // 搜索目标
   async search(keyword: string) {
-    const userId = getCurrentUserId()
-    const q = query(
-      collection(db, 'goals'),
-      where('userId', '==', userId),
-      where('isDeleted', '==', false)
+    const userId = await getCurrentUserId()
+    const { data, error } = await supabase
+      .from('goals')
+      .select('*')
+      .eq('user_id', userId)
+      .eq('is_deleted', false)
+
+    if (error) throw error
+
+    return (data as Goal[]).filter(goal =>
+      goal.title.toLowerCase().includes(keyword.toLowerCase()) ||
+      goal.description.toLowerCase().includes(keyword.toLowerCase())
     )
-    const snapshot = await getDocs(q)
-    return snapshot.docs
-      .map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      }) as Goal)
-      .filter(goal =>
-        goal.title.toLowerCase().includes(keyword.toLowerCase()) ||
-        goal.description.toLowerCase().includes(keyword.toLowerCase())
-      )
   }
 }
 
 // 文件夹操作
 export const folderService = {
   async create(name: string, color: string) {
-    const userId = getCurrentUserId()
-    const docRef = await addDoc(collection(db, 'folders'), {
-      userId,
-      name,
-      color,
-      createdAt: serverTimestamp(),
-      orderIndex: 0
-    })
-    return docRef.id
+    const userId = await getCurrentUserId()
+    const { data, error } = await supabase
+      .from('folders')
+      .insert({
+        user_id: userId,
+        name,
+        color,
+        created_at: new Date().toISOString(),
+        order_index: 0
+      })
+      .select()
+      .single()
+
+    if (error) throw error
+    return data.id
   },
 
   async update(folderId: string, data: Partial<Folder>) {
-    const docRef = doc(db, 'folders', folderId)
-    await updateDoc(docRef, data)
+    const { error } = await supabase
+      .from('folders')
+      .update(data)
+      .eq('id', folderId)
+
+    if (error) throw error
   },
 
   async delete(folderId: string) {
-    const docRef = doc(db, 'folders', folderId)
-    await deleteDoc(docRef)
+    const { error } = await supabase
+      .from('folders')
+      .delete()
+      .eq('id', folderId)
+
+    if (error) throw error
   },
 
   async getAll() {
-    const userId = getCurrentUserId()
-    const q = query(
-      collection(db, 'folders'),
-      where('userId', '==', userId)
-    )
-    const snapshot = await getDocs(q)
-    return snapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data()
-    })) as Folder[]
+    const userId = await getCurrentUserId()
+    const { data, error } = await supabase
+      .from('folders')
+      .select('*')
+      .eq('user_id', userId)
+
+    if (error) throw error
+    return data as Folder[]
   }
 }
 
 // 用户设置操作
 export const settingsService = {
   async get() {
-    const userId = getCurrentUserId()
-    const q = query(
-      collection(db, 'settings'),
-      where('userId', '==', userId)
-    )
-    const snapshot = await getDocs(q)
-    if (snapshot.empty) {
+    const userId = await getCurrentUserId()
+    const { data, error } = await supabase
+      .from('settings')
+      .select('*')
+      .eq('user_id', userId)
+      .single()
+
+    if (error || !data) {
       // 创建默认设置
-      const docRef = await addDoc(collection(db, 'settings'), {
-        userId,
-        keyGoalsCount: 5,
-        theme: 'light',
-        reminderEnabled: true
-      })
-      return {
-        id: docRef.id,
-        userId,
-        keyGoalsCount: 5,
-        theme: 'light',
-        reminderEnabled: true
-      } as UserSettings
+      const { data: newData, error: insertError } = await supabase
+        .from('settings')
+        .insert({
+          user_id: userId,
+          key_goals_count: 5,
+          theme: 'light',
+          reminder_enabled: true
+        })
+        .select()
+        .single()
+
+      if (insertError) throw insertError
+      return newData as UserSettings
     }
-    return {
-      id: snapshot.docs[0].id,
-      ...snapshot.docs[0].data()
-    } as UserSettings
+
+    return data as UserSettings
   },
 
   async update(data: Partial<UserSettings>) {
-    const userId = getCurrentUserId()
-    const q = query(
-      collection(db, 'settings'),
-      where('userId', '==', userId)
-    )
-    const snapshot = await getDocs(q)
-    if (!snapshot.empty) {
-      const docRef = doc(db, 'settings', snapshot.docs[0].id)
-      await updateDoc(docRef, data)
-    }
+    const userId = await getCurrentUserId()
+    const { error } = await supabase
+      .from('settings')
+      .update(data)
+      .eq('user_id', userId)
+
+    if (error) throw error
   }
 }
 
 // 批量操作
 export const batchService = {
-  // 批量完成目标
   async completeGoals(goalIds: string[]) {
-    const promises = goalIds.map(id =>
-      goalService.update(id, {
+    const { error } = await supabase
+      .from('goals')
+      .update({
         status: 'completed',
-        completedAt: Timestamp.now() as any
+        completed_at: new Date().toISOString()
       })
-    )
-    await Promise.all(promises)
+      .in('id', goalIds)
+
+    if (error) throw error
   },
 
-  // 批量删除目标
   async deleteGoals(goalIds: string[]) {
-    const promises = goalIds.map(id => goalService.softDelete(id))
-    await Promise.all(promises)
+    const { error } = await supabase
+      .from('goals')
+      .update({
+        is_deleted: true,
+        deleted_at: new Date().toISOString()
+      })
+      .in('id', goalIds)
+
+    if (error) throw error
   },
 
-  // 批量移动到文件夹
   async moveToFolder(goalIds: string[], folderId: string) {
-    const promises = goalIds.map(id =>
-      goalService.update(id, { folderId })
-    )
-    await Promise.all(promises)
+    const { error } = await supabase
+      .from('goals')
+      .update({ folder_id: folderId })
+      .in('id', goalIds)
+
+    if (error) throw error
   }
 }
 
@@ -332,9 +348,9 @@ export const exportService = {
       goal.status,
       goal.priority,
       goal.tags.join(';'),
-      goal.createdAt?.toDate().toISOString(),
-      goal.targetDate?.toDate().toISOString(),
-      goal.completedAt?.toDate().toISOString()
+      goal.created_at,
+      goal.target_date,
+      goal.completed_at
     ])
 
     const csv = [headers, ...rows].map(row => row.join(',')).join('\n')

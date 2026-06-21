@@ -16,13 +16,13 @@ export default function GoalDetail({ goal, folders, onUpdate, onDelete, onClose 
   const [status, setStatus] = useState(goal.status)
   const [priority, setPriority] = useState(goal.priority)
   const [targetDate, setTargetDate] = useState(
-    goal.targetDate ? format(goal.targetDate.toDate(), 'yyyy-MM-dd') : ''
+    goal.target_date ? format(new Date(goal.target_date), 'yyyy-MM-dd') : ''
   )
-  const [folderId, setFolderId] = useState(goal.folderId || '')
+  const [folderId, setFolderId] = useState(goal.folder_id || '')
   const [tags, setTags] = useState(goal.tags.join(', '))
-  const [isKeyGoal, setIsKeyGoal] = useState(goal.isKeyGoal)
-  const [repeatType, setRepeatType] = useState(goal.repeatRule?.type || 'none')
-  const [repeatInterval, setRepeatInterval] = useState(goal.repeatRule?.interval || 1)
+  const [isKeyGoal, setIsKeyGoal] = useState(goal.is_key_goal)
+  const [repeatType, setRepeatType] = useState(goal.repeat_rule?.type || 'none')
+  const [repeatInterval, setRepeatInterval] = useState(goal.repeat_rule?.interval || 1)
 
   // 当目标变化时更新表单
   useEffect(() => {
@@ -30,12 +30,12 @@ export default function GoalDetail({ goal, folders, onUpdate, onDelete, onClose 
     setDescription(goal.description)
     setStatus(goal.status)
     setPriority(goal.priority)
-    setTargetDate(goal.targetDate ? format(goal.targetDate.toDate(), 'yyyy-MM-dd') : '')
-    setFolderId(goal.folderId || '')
+    setTargetDate(goal.target_date ? format(new Date(goal.target_date), 'yyyy-MM-dd') : '')
+    setFolderId(goal.folder_id || '')
     setTags(goal.tags.join(', '))
-    setIsKeyGoal(goal.isKeyGoal)
-    setRepeatType(goal.repeatRule?.type || 'none')
-    setRepeatInterval(goal.repeatRule?.interval || 1)
+    setIsKeyGoal(goal.is_key_goal)
+    setRepeatType(goal.repeat_rule?.type || 'none')
+    setRepeatInterval(goal.repeat_rule?.interval || 1)
   }, [goal])
 
   // 保存更改
@@ -43,8 +43,8 @@ export default function GoalDetail({ goal, folders, onUpdate, onDelete, onClose 
     const repeatRule = repeatType !== 'none' ? {
       type: repeatType as any,
       interval: repeatInterval,
-      daysOfWeek: [],
-      endDate: null
+      days_of_week: [],
+      end_date: null
     } : null
 
     onUpdate({
@@ -52,11 +52,11 @@ export default function GoalDetail({ goal, folders, onUpdate, onDelete, onClose 
       description,
       status,
       priority,
-      targetDate: targetDate ? new Date(targetDate) as any : null,
-      folderId: folderId || null,
+      target_date: targetDate ? new Date(targetDate) as any : null,
+      folder_id: folderId || null,
       tags: tags.split(',').map(t => t.trim()).filter(t => t),
-      isKeyGoal,
-      repeatRule
+      is_key_goal: isKeyGoal,
+      repeat_rule: repeatRule
     })
   }
 
@@ -226,10 +226,10 @@ export default function GoalDetail({ goal, folders, onUpdate, onDelete, onClose 
         {/* 元信息 */}
         <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
           <div className="text-sm text-gray-500 space-y-1">
-            <p>创建时间：{format(goal.createdAt.toDate(), 'yyyy-MM-dd HH:mm')}</p>
-            <p>更新时间：{format(goal.updatedAt.toDate(), 'yyyy-MM-dd HH:mm')}</p>
-            {goal.completedAt && (
-              <p>完成时间：{format(goal.completedAt.toDate(), 'yyyy-MM-dd HH:mm')}</p>
+            <p>创建时间：{format(new Date(goal.created_at), 'yyyy-MM-dd HH:mm')}</p>
+            <p>更新时间：{format(new Date(goal.updated_at), 'yyyy-MM-dd HH:mm')}</p>
+            {goal.completed_at && (
+              <p>完成时间：{format(new Date(goal.completed_at), 'yyyy-MM-dd HH:mm')}</p>
             )}
           </div>
         </div>

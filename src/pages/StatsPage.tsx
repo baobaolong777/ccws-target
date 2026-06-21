@@ -34,15 +34,15 @@ export default function StatsPage() {
 
   // 本周完成的目标
   const weekCompleted = completedGoals.filter(g => {
-    if (!g.completedAt) return false
-    const completedDate = g.completedAt.toDate()
+    if (!g.completed_at) return false
+    const completedDate = new Date(g.completed_at)
     return isWithinInterval(completedDate, { start: weekStart, end: weekEnd })
   })
 
   // 本月完成的目标
   const monthCompleted = completedGoals.filter(g => {
-    if (!g.completedAt) return false
-    const completedDate = g.completedAt.toDate()
+    if (!g.completed_at) return false
+    const completedDate = new Date(g.completed_at)
     return isWithinInterval(completedDate, { start: monthStart, end: monthEnd })
   })
 
@@ -184,8 +184,8 @@ export default function StatsPage() {
           <div className="space-y-3">
             {completedGoals
               .sort((a, b) => {
-                const aTime = a.completedAt?.toMillis() || 0
-                const bTime = b.completedAt?.toMillis() || 0
+                const aTime = a.completed_at ? new Date(a.completed_at).getTime() : 0
+                const bTime = b.completed_at ? new Date(b.completed_at).getTime() : 0
                 return bTime - aTime
               })
               .slice(0, 5)
@@ -201,8 +201,8 @@ export default function StatsPage() {
                     </span>
                   </div>
                   <span className="text-sm text-gray-500">
-                    {goal.completedAt
-                      ? format(goal.completedAt.toDate(), 'M/d')
+                    {goal.completed_at
+                      ? format(new Date(goal.completed_at), 'M/d')
                       : ''}
                   </span>
                 </div>

@@ -1,7 +1,6 @@
 import { ReactNode } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
-import { signOut } from 'firebase/auth'
-import { auth } from '../lib/firebase'
+import { supabase } from '../lib/supabase'
 
 interface LayoutProps {
   children: ReactNode
@@ -13,7 +12,7 @@ export default function Layout({ children }: LayoutProps) {
 
   const handleLogout = async () => {
     try {
-      await signOut(auth)
+      await supabase.auth.signOut()
     } catch (error) {
       console.error('退出登录失败:', error)
     }
