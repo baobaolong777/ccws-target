@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { Goal, goalService, taskService } from '../../lib/db'
+import { useState, useEffect } from 'react'
+import { Goal, Task, goalService, taskService } from '../../lib/db'
 import { format, differenceInDays } from 'date-fns'
 
 interface GoalTreeNodeProps {
@@ -38,10 +38,44 @@ export default function GoalTreeNode({
   const [taskTitle, setTaskTitle] = useState('')
   const [taskStartDate, setTaskStartDate] = useState('')
   const [taskDueDate, setTaskDueDate] = useState('')
+  const [tasks, setTasks] = useState<Task[]>([])
+  const [showTasks, setShowTasks] = useState(false)
 
   const children = getChildren(goal.id!)
   const hasChildren = children.length > 0
   const isExpanded = expandedIds.has(goal.id!)
+
+  // 加载任务
+  useEffect(() => {
+    loadTasks()
+  }, [goal.id])
+
+  const loadTasks = async () => {
+    try {
+      const data = await taskService.getByGoal(goal.id!)
+      setTasks(data)
+    } catch (error) {
+      console.error('加载任务失败:', error)
+    }
+  }
+
+  const handleCompleteTask = async (taskId: string, completed: boolean) => {
+    try {
+      await taskService.update(taskId, { status: completed ? 'completed' : 'pending' })
+      loadTasks()
+    } catch (error) {
+      console.error('更新任务失败:', error)
+    }
+  }
+
+  const handleDeleteTask = async (taskId: string) => {
+    try {
+      await taskService.delete(taskId)
+      loadTasks()
+    } catch (error) {
+      console.error('删除任务失败:', error)
+    }
+  }
 
   const getDaysRemaining = () => {
     if (!goal.target_date) return null
@@ -209,6 +243,14 @@ export default function GoalTreeNode({
                 </span>
               )}
               {hasChildren && <span>{children.length} 个子目标</span>}
+              {tasks.length > 0 && (
+                <button
+                  onClick={(e) => { e.stopPropagation(); setShowTasks(!showTasks) }}
+                  className="text-blue-500 hover:text-blue-600"
+                >
+                  {tasks.length} 个任务 {showTasks ? '▲' : '▼'}
+                </button>
+              )}
               {goal.tags && goal.tags.length > 0 && (
                 <div className="flex gap-1">
                   {goal.tags.slice(0, 2).map((tag, i) => (
@@ -258,6 +300,46 @@ export default function GoalTreeNode({
           </div>
         </div>
       </div>
+
+      {/* 任务列表 */}
+      {showTasks && tasks.length > 0 && (
+        <div className="mt-2 ml-8 space-y-1">
+          {tasks.map(task => (
+            <div key={task.id} className={`flex items-center gap-2 p-2 rounded text-sm ${
+              task.status === 'completed'
+                ? 'bg-green-50 dark:bg-green-900/20'
+                : 'bg-gray-50 dark:bg-gray-700'
+            }`}>
+              <button
+                onClick={() => handleCompleteTask(task.id!, task.status !== 'completed')}
+                className={`w-4 h-4 rounded border flex items-center justify-center ${
+                  task.status === 'completed'
+                    ? 'bg-green-500 border-green-500'
+                    : 'border-gray-300 dark:border-gray-600'
+                }`}
+              >
+                {task.status === 'completed' && <span className="text-white text-xs">✓</span>}
+              </button>
+              <span className={`flex-1 ${
+                task.status === 'completed' ? 'line-through text-gray-400' : 'text-gray-700 dark:text-gray-300'
+              }`}>
+                📝 {task.title}
+              </span>
+              {task.due_date && (
+                <span className="text-xs text-gray-400">
+                  截止: {format(new Date(task.due_date), 'MM/dd')}
+                </span>
+              )}
+              <button
+                onClick={() => handleDeleteTask(task.id!)}
+                className="text-gray-400 hover:text-red-500 text-xs"
+              >
+                ✕
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
 
       {/* 子目标 */}
       {isExpanded && hasChildren && (

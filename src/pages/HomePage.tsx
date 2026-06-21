@@ -195,6 +195,7 @@ export default function HomePage() {
         onComplete={handleCompleteGoal}
         onUndoComplete={handleUndoComplete}
         onSelect={setSelectedGoal}
+        onRefresh={loadData}
       />
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
