@@ -88,31 +88,29 @@ export default function DailyGoals({ onComplete, onUndoComplete }: DailyGoalsPro
 
   return (
     <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4">
-      <div className="flex items-center justify-between mb-4">
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+      <div className="flex items-center gap-3 mb-4">
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-white whitespace-nowrap">
           🔄 每日目标
         </h3>
-        <span className="text-sm text-gray-500">
+        <div className="flex-1 flex items-center gap-2">
+          <input
+            type="text"
+            placeholder="添加..."
+            value={newTitle}
+            onChange={(e) => setNewTitle(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && handleAdd()}
+            className="flex-1 px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white text-sm"
+          />
+          <button
+            onClick={handleAdd}
+            className="px-3 py-1.5 bg-blue-500 text-white rounded-lg hover:bg-blue-600 text-sm"
+          >
+            +
+          </button>
+        </div>
+        <span className="text-sm text-gray-500 whitespace-nowrap">
           {completedCount}/{goals.length}
         </span>
-      </div>
-
-      {/* Add form */}
-      <div className="flex gap-2 mb-4">
-        <input
-          type="text"
-          placeholder="添加每日目标..."
-          value={newTitle}
-          onChange={(e) => setNewTitle(e.target.value)}
-          onKeyDown={(e) => e.key === 'Enter' && handleAdd()}
-          className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white text-sm"
-        />
-        <button
-          onClick={handleAdd}
-          className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 text-sm"
-        >
-          添加
-        </button>
       </div>
 
       {/* Goal list */}
