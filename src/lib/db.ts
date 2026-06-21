@@ -13,6 +13,7 @@ export interface Goal {
   folder_id: string | null
   created_at: string
   updated_at: string
+  start_date: string | null
   target_date: string | null
   completed_at: string | null
   parent_id: string | null
@@ -322,6 +323,54 @@ export const batchService = {
       .update({ folder_id: folderId })
       .in('id', goalIds)
 
+    if (error) throw error
+  }
+}
+
+// 任务类型和服务
+export interface Task {
+  id?: string
+  goal_id: string
+  user_id: string
+  title: string
+  status: 'pending' | 'in_progress' | 'completed'
+  start_date: string | null
+  due_date: string | null
+  created_at: string
+  order_index: number
+}
+
+export const taskService = {
+  async getByGoal(goalId: string) {
+    const userId = await getCurrentUserId()
+    const { data, error } = await supabase
+      .from('tasks')
+      .select('*')
+      .eq('goal_id', goalId)
+      .eq('user_id', userId)
+      .order('order_index')
+    if (error) throw error
+    return data as Task[]
+  },
+
+  async create(task: Omit<Task, 'id' | 'user_id' | 'created_at'>) {
+    const userId = await getCurrentUserId()
+    const { data, error } = await supabase
+      .from('tasks')
+      .insert({ ...task, user_id: userId, created_at: new Date().toISOString() })
+      .select()
+      .single()
+    if (error) throw error
+    return data.id
+  },
+
+  async update(taskId: string, data: Partial<Task>) {
+    const { error } = await supabase.from('tasks').update(data).eq('id', taskId)
+    if (error) throw error
+  },
+
+  async delete(taskId: string) {
+    const { error } = await supabase.from('tasks').delete().eq('id', taskId)
     if (error) throw error
   }
 }

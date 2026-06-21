@@ -15,6 +15,9 @@ export default function GoalDetail({ goal, folders, onUpdate, onDelete, onClose 
   const [description, setDescription] = useState(goal.description)
   const [status, setStatus] = useState(goal.status)
   const [priority, setPriority] = useState(goal.priority)
+  const [startDate, setStartDate] = useState(
+    goal.start_date ? format(new Date(goal.start_date), 'yyyy-MM-dd') : ''
+  )
   const [targetDate, setTargetDate] = useState(
     goal.target_date ? format(new Date(goal.target_date), 'yyyy-MM-dd') : ''
   )
@@ -30,6 +33,7 @@ export default function GoalDetail({ goal, folders, onUpdate, onDelete, onClose 
     setDescription(goal.description)
     setStatus(goal.status)
     setPriority(goal.priority)
+    setStartDate(goal.start_date ? format(new Date(goal.start_date), 'yyyy-MM-dd') : '')
     setTargetDate(goal.target_date ? format(new Date(goal.target_date), 'yyyy-MM-dd') : '')
     setFolderId(goal.folder_id || '')
     setTags(goal.tags.join(', '))
@@ -52,6 +56,7 @@ export default function GoalDetail({ goal, folders, onUpdate, onDelete, onClose 
       description,
       status,
       priority,
+      start_date: startDate ? new Date(startDate) as any : null,
       target_date: targetDate ? new Date(targetDate) as any : null,
       folder_id: folderId || null,
       tags: tags.split(',').map(t => t.trim()).filter(t => t),
@@ -133,6 +138,19 @@ export default function GoalDetail({ goal, folders, onUpdate, onDelete, onClose 
               <option value="low">低</option>
             </select>
           </div>
+        </div>
+
+        {/* 开始日期 */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            开始日期
+          </label>
+          <input
+            type="date"
+            value={startDate}
+            onChange={(e) => setStartDate(e.target.value)}
+            className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
+          />
         </div>
 
         {/* 目标日期 */}

@@ -82,6 +82,7 @@ export default function GoalTreeNode({
         tags: [],
         folder_id: goal.folder_id || null,
         parent_id: goal.id || null,
+        start_date: null,
         order_index: children.length,
         time_spent: 0,
         reminder_at: null,

@@ -69,6 +69,7 @@ export default function HomePage() {
         tags: goalData.tags || [],
         folder_id: goalData.folder_id || null,
         parent_id: goalData.parent_id || null,
+        start_date: goalData.start_date || null,
         target_date: goalData.target_date || null,
         completed_at: null,
         order_index: goals.length,
@@ -87,49 +88,64 @@ export default function HomePage() {
 
   // 更新目标
   const handleUpdateGoal = async (goalId: string, data: Partial<Goal>) => {
+    // Optimistic update
+    setGoals(prev => prev.map(g => g.id === goalId ? { ...g, ...data } : g))
+    setKeyGoals(prev => prev.map(g => g.id === goalId ? { ...g, ...data } : g))
+    setSelectedGoal(null)
     try {
       await goalService.update(goalId, data)
-      await loadData()
-      setSelectedGoal(null)
     } catch (error) {
       console.error('更新目标失败:', error)
+      loadData()
     }
   }
 
   // 删除目标
   const handleDeleteGoal = async (goalId: string) => {
+    // Optimistic update
+    setGoals(prev => prev.filter(g => g.id !== goalId))
+    setKeyGoals(prev => prev.filter(g => g.id !== goalId))
+    setSelectedGoal(null)
     try {
       await goalService.softDelete(goalId)
-      await loadData()
-      setSelectedGoal(null)
     } catch (error) {
       console.error('删除目标失败:', error)
+      loadData()
     }
   }
 
   // 完成目标
   const handleCompleteGoal = async (goalId: string) => {
+    // Optimistic update
+    setGoals(prev => prev.map(g =>
+      g.id === goalId ? { ...g, status: 'completed', completed_at: new Date().toISOString() } : g
+    ))
+    setKeyGoals(prev => prev.filter(g => g.id !== goalId))
     try {
       await goalService.update(goalId, {
         status: 'completed',
-        completed_at: new Date() as any
+        completed_at: new Date().toISOString()
       })
-      await loadData()
     } catch (error) {
       console.error('完成目标失败:', error)
+      loadData()
     }
   }
 
   // 撤销完成
   const handleUndoComplete = async (goalId: string) => {
+    // Optimistic update
+    setGoals(prev => prev.map(g =>
+      g.id === goalId ? { ...g, status: 'pending', completed_at: null } : g
+    ))
     try {
       await goalService.update(goalId, {
         status: 'pending',
         completed_at: null
       })
-      await loadData()
     } catch (error) {
       console.error('撤销完成失败:', error)
+      loadData()
     }
   }
 
@@ -241,6 +257,7 @@ function NewGoalModal({ folders, onSubmit, onClose }: {
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
   const [priority, setPriority] = useState<'high' | 'medium' | 'low'>('medium')
+  const [startDate, setStartDate] = useState('')
   const [targetDate, setTargetDate] = useState('')
   const [folderId, setFolderId] = useState<string | null>(null)
   const [isKeyGoal, setIsKeyGoal] = useState(false)
@@ -251,6 +268,7 @@ function NewGoalModal({ folders, onSubmit, onClose }: {
       title,
       description,
       priority,
+      start_date: startDate ? new Date(startDate) as any : null,
       target_date: targetDate ? new Date(targetDate) as any : null,
       folder_id: folderId,
       is_key_goal: isKeyGoal
@@ -305,6 +323,18 @@ function NewGoalModal({ folders, onSubmit, onClose }: {
                   <option value="medium">中</option>
                   <option value="low">低</option>
                 </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  开始日期
+                </label>
+                <input
+                  type="date"
+                  value={startDate}
+                  onChange={(e) => setStartDate(e.target.value)}
+                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
+                />
               </div>
 
               <div>
