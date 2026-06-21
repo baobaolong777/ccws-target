@@ -147,7 +147,7 @@ export default function StatsPage() {
       {/* 时间统计 */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* 本周完成 */}
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
+        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm p-6">
           <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
             📅 本周完成
           </h3>
@@ -160,7 +160,7 @@ export default function StatsPage() {
         </div>
 
         {/* 本月完成 */}
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
+        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm p-6">
           <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
             📊 本月完成
           </h3>
@@ -239,7 +239,7 @@ export default function StatsPage() {
               .map((goal) => (
                 <div
                   key={goal.id}
-                  className="flex items-center gap-3 p-3 bg-green-50 dark:bg-green-900/20 rounded-lg hover:bg-green-100 dark:hover:bg-green-900/30 transition-colors"
+                  className="flex items-center gap-3 p-3 bg-green-50 dark:bg-green-900/20 rounded-2xl hover:bg-green-100 dark:hover:bg-green-900/30 transition-colors"
                 >
                   <div className="flex-1">
                     <span className="font-medium text-gray-900 dark:text-white line-through">
@@ -256,7 +256,7 @@ export default function StatsPage() {
                   </span>
                   <button
                     onClick={() => handleUndoComplete(goal.id!)}
-                    className="text-blue-500 hover:text-blue-600 text-sm px-2 py-1"
+                    className="text-blue-500 hover:text-blue-600 text-sm px-2 py-1 active:scale-[0.98] transition-all duration-200"
                   >
                     取消完成
                   </button>
@@ -287,9 +287,9 @@ function StatCard({ title, value, icon, color }: {
   }
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4">
+    <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm p-4">
       <div className="flex items-center gap-3">
-        <div className={`p-2 rounded-lg ${colorClasses[color as keyof typeof colorClasses]}`}>
+        <div className={`p-2 rounded-2xl ${colorClasses[color as keyof typeof colorClasses]}`}>
           <span className="text-xl">{icon}</span>
         </div>
         <div>

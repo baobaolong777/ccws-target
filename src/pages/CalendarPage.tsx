@@ -111,13 +111,13 @@ export default function CalendarPage() {
         <div className="flex gap-2">
           <button
             onClick={() => setViewMode('month')}
-            className={`px-3 py-1 rounded-lg text-sm ${viewMode === 'month' ? 'bg-blue-500 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300'}`}
+            className={`px-3 py-1 rounded-2xl text-sm active:scale-[0.98] transition-all duration-200 ${viewMode === 'month' ? 'bg-blue-500 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'}`}
           >
             月
           </button>
           <button
             onClick={() => setViewMode('week')}
-            className={`px-3 py-1 rounded-lg text-sm ${viewMode === 'week' ? 'bg-blue-500 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300'}`}
+            className={`px-3 py-1 rounded-2xl text-sm active:scale-[0.98] transition-all duration-200 ${viewMode === 'week' ? 'bg-blue-500 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'}`}
           >
             周
           </button>
@@ -125,12 +125,12 @@ export default function CalendarPage() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
+        <div className="lg:col-span-2 bg-white dark:bg-gray-800 rounded-2xl shadow-sm p-6">
           {/* Month navigation */}
           <div className="flex items-center justify-between mb-6">
             <button
               onClick={() => setCurrentMonth(subMonths(currentMonth, 1))}
-              className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg text-gray-700 dark:text-gray-300"
+              className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-2xl text-gray-700 dark:text-gray-300 active:scale-[0.95] transition-all duration-200"
             >
               ←
             </button>
@@ -140,14 +140,14 @@ export default function CalendarPage() {
               </h3>
               <button
                 onClick={() => { setCurrentMonth(new Date()); setSelectedDate(new Date()) }}
-                className="px-3 py-1 bg-blue-500 text-white rounded-lg text-sm hover:bg-blue-600 transition-colors"
+                className="px-3 py-1 bg-blue-500 text-white rounded-2xl text-sm hover:bg-blue-600 active:scale-[0.98] transition-all duration-200"
               >
                 今天
               </button>
             </div>
             <button
               onClick={() => setCurrentMonth(addMonths(currentMonth, 1))}
-              className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg text-gray-700 dark:text-gray-300"
+              className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-2xl text-gray-700 dark:text-gray-300 active:scale-[0.95] transition-all duration-200"
             >
               →
             </button>
@@ -178,7 +178,7 @@ export default function CalendarPage() {
                 <button
                   key={day.toISOString()}
                   onClick={() => setSelectedDate(day)}
-                  className={`p-1.5 sm:p-1 rounded-lg relative flex flex-col items-center justify-center min-h-[44px] sm:min-h-0 sm:aspect-square transition-colors ${
+                  className={`p-1.5 sm:p-1 rounded-2xl relative flex flex-col items-center justify-center min-h-[44px] sm:min-h-0 sm:aspect-square transition-colors active:scale-[0.95] ${
                     isSelected
                       ? 'bg-blue-500 text-white'
                       : isTodayDate
@@ -206,7 +206,7 @@ export default function CalendarPage() {
         </div>
 
         {/* Right panel - selected date details */}
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
+        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm p-6">
           <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
             {selectedDate ? format(selectedDate, 'M月d日', { locale: zhCN }) + ' 的安排' : '选择一个日期'}
           </h3>
@@ -220,7 +220,7 @@ export default function CalendarPage() {
                     <div
                       key={goal.id}
                       onClick={() => setSelectedGoal(goal)}
-                      className="p-3 rounded-lg border border-gray-200 dark:border-gray-600 mb-2 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer transition-colors"
+                      className="p-3 rounded-2xl border border-gray-200 dark:border-gray-600 mb-2 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer transition-colors active:scale-[0.98]"
                     >
                       <div className="flex items-center gap-2">
                         <div className={`w-2 h-2 rounded-full ${
@@ -253,7 +253,7 @@ export default function CalendarPage() {
                   {selectedItems.tasks.map((task: any) => (
                     <div
                       key={task.id}
-                      className={`p-3 rounded-lg border mb-2 ${
+                      className={`p-3 rounded-2xl border mb-2 ${
                         task.status === 'completed'
                           ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800'
                           : 'border-gray-200 dark:border-gray-600'
@@ -282,11 +282,19 @@ export default function CalendarPage() {
               )}
 
               {selectedItems.goals.length === 0 && selectedItems.tasks.length === 0 && (
-                <p className="text-gray-500 text-center py-4">这天没有安排</p>
+                <div className="text-center py-8 text-gray-500">
+                  <div className="text-4xl mb-3">📅</div>
+                  <p className="font-medium text-gray-700 dark:text-gray-300">这天没有安排</p>
+                  <p className="text-sm mt-1">享受轻松的一天吧！</p>
+                </div>
               )}
             </div>
           ) : (
-            <p className="text-gray-500 text-center py-4">点击日历中的日期查看详情</p>
+            <div className="text-center py-8 text-gray-500">
+              <div className="text-4xl mb-3">📆</div>
+              <p className="font-medium text-gray-700 dark:text-gray-300">选择日期查看安排</p>
+              <p className="text-sm mt-1">点击日历中的日期</p>
+            </div>
           )}
         </div>
       </div>

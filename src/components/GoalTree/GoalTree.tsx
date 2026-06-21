@@ -63,16 +63,22 @@ export default function GoalTree({ goals, onComplete, onUndoComplete, onSelect, 
   }
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4">
+    <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm p-5">
       <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
         📋 全部目标
       </h3>
 
       {rootGoals.length === 0 ? (
-        <div className="text-center py-8 text-gray-500">
-          <div className="text-4xl mb-2">📝</div>
-          <p>还没有目标</p>
-          <p className="text-sm">点击"新建"创建第一个目标</p>
+        <div className="text-center py-10 text-gray-500">
+          <div className="w-16 h-16 mx-auto mb-4 bg-blue-50 dark:bg-blue-900/30 rounded-2xl flex items-center justify-center">
+            <span className="text-3xl">🎯</span>
+          </div>
+          <p className="font-medium text-gray-700 dark:text-gray-300">还没有目标</p>
+          <p className="text-sm mt-1 mb-4">点击上方 "新建" 创建第一个目标</p>
+          <div className="inline-flex items-center gap-1 text-blue-500 text-sm">
+            <span>开始规划你的目标之旅</span>
+            <span>→</span>
+          </div>
         </div>
       ) : (
         <div className="space-y-2">
@@ -83,7 +89,7 @@ export default function GoalTree({ goals, onComplete, onUndoComplete, onSelect, 
                 <button
                   onClick={() => handleMoveGoal(goal.id!, 'up')}
                   disabled={index === 0 || reordering}
-                  className="w-6 h-6 flex items-center justify-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors"
+                  className="w-6 h-6 flex items-center justify-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-gray-100 dark:hover:bg-gray-700 rounded-2xl active:scale-[0.95] transition-all duration-200"
                   title="上移"
                 >
                   ↑
@@ -91,7 +97,7 @@ export default function GoalTree({ goals, onComplete, onUndoComplete, onSelect, 
                 <button
                   onClick={() => handleMoveGoal(goal.id!, 'down')}
                   disabled={index === rootGoals.length - 1 || reordering}
-                  className="w-6 h-6 flex items-center justify-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors"
+                  className="w-6 h-6 flex items-center justify-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-gray-100 dark:hover:bg-gray-700 rounded-2xl active:scale-[0.95] transition-all duration-200"
                   title="下移"
                 >
                   ↓

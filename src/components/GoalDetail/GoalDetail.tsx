@@ -70,7 +70,7 @@ export default function GoalDetail({ goal, folders, onUpdate, onDelete, onClose,
   const markDirty = () => onDirtyChange?.(true)
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
+    <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm p-6">
       <div className="flex items-center justify-between mb-6">
         <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
           目标详情
@@ -93,7 +93,7 @@ export default function GoalDetail({ goal, folders, onUpdate, onDelete, onClose,
             type="text"
             value={title}
             onChange={(e) => { setTitle(e.target.value); markDirty() }}
-            className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
+            className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-2xl focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
           />
         </div>
 
@@ -106,7 +106,7 @@ export default function GoalDetail({ goal, folders, onUpdate, onDelete, onClose,
             value={description}
             onChange={(e) => { setDescription(e.target.value); markDirty() }}
             rows={3}
-            className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
+            className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-2xl focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
           />
         </div>
 
@@ -119,7 +119,7 @@ export default function GoalDetail({ goal, folders, onUpdate, onDelete, onClose,
             <select
               value={status}
               onChange={(e) => { setStatus(e.target.value as any); markDirty() }}
-              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
+              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-2xl focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
             >
               <option value="pending">待完成</option>
               <option value="in_progress">进行中</option>
@@ -135,7 +135,7 @@ export default function GoalDetail({ goal, folders, onUpdate, onDelete, onClose,
             <select
               value={priority}
               onChange={(e) => { setPriority(e.target.value as any); markDirty() }}
-              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
+              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-2xl focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
             >
               <option value="high">高</option>
               <option value="medium">中</option>
@@ -153,7 +153,7 @@ export default function GoalDetail({ goal, folders, onUpdate, onDelete, onClose,
             type="date"
             value={startDate}
             onChange={(e) => { setStartDate(e.target.value); markDirty() }}
-            className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
+            className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-2xl focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
           />
         </div>
 
@@ -166,7 +166,7 @@ export default function GoalDetail({ goal, folders, onUpdate, onDelete, onClose,
             type="date"
             value={targetDate}
             onChange={(e) => { setTargetDate(e.target.value); markDirty() }}
-            className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
+            className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-2xl focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
           />
         </div>
 
@@ -178,7 +178,7 @@ export default function GoalDetail({ goal, folders, onUpdate, onDelete, onClose,
           <select
             value={folderId}
             onChange={(e) => { setFolderId(e.target.value); markDirty() }}
-            className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
+            className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-2xl focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
           >
             <option value="">无</option>
             {folders.map((folder) => (
@@ -199,7 +199,7 @@ export default function GoalDetail({ goal, folders, onUpdate, onDelete, onClose,
             value={tags}
             onChange={(e) => { setTags(e.target.value); markDirty() }}
             placeholder="工作, 学习, 生活"
-            className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
+            className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-2xl focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
           />
         </div>
 
@@ -212,7 +212,7 @@ export default function GoalDetail({ goal, folders, onUpdate, onDelete, onClose,
             <select
               value={repeatType}
               onChange={(e) => { setRepeatType(e.target.value as 'daily' | 'weekly' | 'monthly' | 'none'); markDirty() }}
-              className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
+              className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-2xl focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
             >
               <option value="none">不重复</option>
               <option value="daily">每天</option>
@@ -225,7 +225,7 @@ export default function GoalDetail({ goal, folders, onUpdate, onDelete, onClose,
                 min="1"
                 value={repeatInterval}
                 onChange={(e) => { setRepeatInterval(parseInt(e.target.value) || 1); markDirty() }}
-                className="w-20 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
+                className="w-20 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-2xl focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
               />
             )}
           </div>
@@ -260,13 +260,13 @@ export default function GoalDetail({ goal, folders, onUpdate, onDelete, onClose,
         <div className="flex gap-3 pt-4">
           <button
             onClick={handleSave}
-            className="flex-1 py-2 px-4 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+            className="flex-1 py-2 px-4 bg-blue-500 text-white rounded-2xl hover:bg-blue-600 active:scale-[0.98] transition-all duration-200"
           >
             保存
           </button>
           <button
             onClick={onDelete}
-            className="py-2 px-4 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
+            className="py-2 px-4 bg-red-500 text-white rounded-2xl hover:bg-red-600 active:scale-[0.98] transition-all duration-200"
           >
             删除
           </button>

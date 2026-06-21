@@ -251,7 +251,7 @@ export default function HomePage({ showNewGoal, setShowNewGoal }: { showNewGoal:
               placeholder="搜索目标..."
               value={searchKeyword}
               onChange={(e) => handleSearchChange(e.target.value)}
-              className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
+              className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-2xl focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
             />
           </div>
 
@@ -292,10 +292,10 @@ export default function HomePage({ showNewGoal, setShowNewGoal }: { showNewGoal:
 
         {/* Goal detail - Mobile bottom sheet */}
         {selectedGoal && (
-          <div className="lg:hidden fixed inset-x-0 bottom-0 z-40 bg-white dark:bg-gray-800 rounded-t-2xl shadow-2xl max-h-[70vh] overflow-y-auto p-4">
+          <div className="lg:hidden fixed inset-x-0 bottom-0 z-40 bg-white dark:bg-gray-800 rounded-t-2xl shadow-2xl max-h-[70vh] overflow-y-auto p-4 animate-slide-up">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white">目标详情</h3>
-              <button onClick={() => setSelectedGoal(null)} className="text-gray-400 hover:text-gray-600 text-xl">✕</button>
+              <button onClick={() => setSelectedGoal(null)} className="text-gray-400 hover:text-gray-600 text-xl active:scale-95 transition-all duration-200">✕</button>
             </div>
             <GoalDetail
               goal={selectedGoal}
@@ -321,7 +321,7 @@ export default function HomePage({ showNewGoal, setShowNewGoal }: { showNewGoal:
       {/* Mobile FAB */}
       <button
         onClick={() => setShowNewGoal(true)}
-        className="md:hidden fixed bottom-20 right-4 w-14 h-14 bg-blue-500 text-white rounded-full shadow-lg hover:bg-blue-600 flex items-center justify-center text-2xl z-40"
+        className="md:hidden fixed bottom-20 right-4 w-14 h-14 bg-blue-500 text-white rounded-full shadow-lg hover:bg-blue-600 active:scale-95 flex items-center justify-center text-2xl z-40 transition-all duration-200"
       >
         +
       </button>
@@ -398,7 +398,7 @@ function NewGoalModal({ folders, onSubmit, onClose }: {
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-md">
+      <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl w-full max-w-md animate-fade-in">
         <div className="p-6">
           <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
             新建目标
@@ -413,7 +413,7 @@ function NewGoalModal({ folders, onSubmit, onClose }: {
                 type="text"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
+                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-2xl focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
                 required
               />
             </div>
@@ -426,7 +426,7 @@ function NewGoalModal({ folders, onSubmit, onClose }: {
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 rows={3}
-                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
+                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-2xl focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
               />
             </div>
 
@@ -438,7 +438,7 @@ function NewGoalModal({ folders, onSubmit, onClose }: {
                 <select
                   value={priority}
                   onChange={(e) => setPriority(e.target.value as any)}
-                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
+                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-2xl focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
                 >
                   <option value="high">高</option>
                   <option value="medium">中</option>
@@ -454,7 +454,7 @@ function NewGoalModal({ folders, onSubmit, onClose }: {
                   type="date"
                   value={startDate}
                   onChange={(e) => setStartDate(e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
+                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-2xl focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
                 />
               </div>
 
@@ -466,7 +466,7 @@ function NewGoalModal({ folders, onSubmit, onClose }: {
                   type="date"
                   value={targetDate}
                   onChange={(e) => setTargetDate(e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
+                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-2xl focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
                 />
               </div>
             </div>
@@ -478,7 +478,7 @@ function NewGoalModal({ folders, onSubmit, onClose }: {
               <select
                 value={folderId || ''}
                 onChange={(e) => setFolderId(e.target.value || null)}
-                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
+                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-2xl focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
               >
                 <option value="">无</option>
                 {folders.map((folder) => (
@@ -519,13 +519,13 @@ function NewGoalModal({ folders, onSubmit, onClose }: {
               <button
                 type="button"
                 onClick={onClose}
-                className="flex-1 py-2 px-4 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                className="flex-1 py-2 px-4 border border-gray-300 dark:border-gray-600 rounded-2xl hover:bg-gray-50 dark:hover:bg-gray-700 active:scale-[0.98] transition-all duration-200"
               >
                 取消
               </button>
               <button
                 type="submit"
-                className="flex-1 py-2 px-4 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+                className="flex-1 py-2 px-4 bg-blue-500 text-white rounded-2xl hover:bg-blue-600 active:scale-[0.98] transition-all duration-200"
               >
                 创建
               </button>

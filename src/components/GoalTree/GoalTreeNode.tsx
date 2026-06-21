@@ -234,14 +234,14 @@ export default function GoalTreeNode({
   return (
     <div style={{ marginLeft: level * 24 }}>
       <div
-        className={`p-3 rounded-lg border cursor-pointer ${getStatusStyle()}`}
+        className={`p-3 rounded-2xl border cursor-pointer ${getStatusStyle()}`}
         onClick={() => setSelectedGoalDetail(goal)}
       >
         <div className="flex items-start gap-3">
           {hasChildren ? (
             <button
               onClick={(e) => { e.stopPropagation(); onToggleExpand(goal.id!) }}
-              className="mt-1 w-5 h-5 flex items-center justify-center text-gray-500 hover:text-gray-700"
+              className="mt-1 w-5 h-5 flex items-center justify-center text-gray-500 hover:text-gray-700 animate-pulse-once"
             >
               {isExpanded ? '▼' : '▶'}
             </button>
@@ -255,13 +255,13 @@ export default function GoalTreeNode({
               if (goal.status === 'completed') onUndoComplete(goal.id!)
               else onComplete(goal.id!)
             }}
-            className={`mt-1 w-5 h-5 rounded border-2 flex items-center justify-center ${
+            className={`mt-1 w-5 h-5 rounded border-2 flex items-center justify-center animate-pulse-once ${
               goal.status === 'completed'
-                ? 'bg-green-500 border-green-500'
+                ? 'bg-green-500 border-green-500 animate-check'
                 : 'border-gray-300 dark:border-gray-600 hover:border-blue-500'
             }`}
           >
-            {goal.status === 'completed' && <span className="text-white text-xs">✓</span>}
+            {goal.status === 'completed' && <span className="text-white text-xs animate-check">✓</span>}
           </button>
 
           <div className="flex-1 min-w-0">
@@ -319,16 +319,16 @@ export default function GoalTreeNode({
           <div className="relative">
             <button
               onClick={(e) => { e.stopPropagation(); setShowMenu(!showMenu) }}
-              className="p-1 hover:bg-gray-100 dark:hover:bg-gray-600 rounded"
+              className="p-1 hover:bg-gray-100 dark:hover:bg-gray-600 rounded animate-pulse-once"
             >
               ⋮
             </button>
 
             {showMenu && (
-              <div className="absolute right-0 top-full mt-1 w-36 bg-white dark:bg-gray-700 rounded-lg shadow-lg border border-gray-200 dark:border-gray-600 z-10">
+              <div className="absolute right-0 top-full mt-1 w-36 bg-white dark:bg-gray-700 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-600 z-10 animate-fade-in">
                 <button
                   onClick={(e) => { e.stopPropagation(); setShowEditGoal(true); setShowMenu(false) }}
-                  className="w-full px-3 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-600 rounded-t-lg"
+                  className="w-full px-3 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-600 rounded-t-2xl"
                 >
                   ✏️ 编辑
                 </button>
@@ -352,7 +352,7 @@ export default function GoalTreeNode({
                 </button>
                 <button
                   onClick={(e) => { e.stopPropagation(); handleDelete(); setShowMenu(false) }}
-                  className="w-full px-3 py-2 text-left text-sm text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-b-lg"
+                  className="w-full px-3 py-2 text-left text-sm text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-b-2xl"
                 >
                   🗑️ 删除
                 </button>
@@ -373,13 +373,13 @@ export default function GoalTreeNode({
             }`}>
               <button
                 onClick={() => handleCompleteTask(task.id!, task.status !== 'completed')}
-                className={`w-4 h-4 rounded border flex items-center justify-center ${
+                className={`w-4 h-4 rounded border flex items-center justify-center animate-pulse-once ${
                   task.status === 'completed'
-                    ? 'bg-green-500 border-green-500'
+                    ? 'bg-green-500 border-green-500 animate-check'
                     : 'border-gray-300 dark:border-gray-600'
                 }`}
               >
-                {task.status === 'completed' && <span className="text-white text-xs">✓</span>}
+                {task.status === 'completed' && <span className="text-white text-xs animate-check">✓</span>}
               </button>
               <span className={`flex-1 ${
                 task.status === 'completed' ? 'line-through text-gray-400' : 'text-gray-700 dark:text-gray-300'
@@ -426,25 +426,25 @@ export default function GoalTreeNode({
       {/* 添加子目标弹窗 */}
       {showAddChild && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={() => setShowAddChild(false)}>
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-md" onClick={e => e.stopPropagation()}>
+          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl w-full max-w-md animate-fade-in" onClick={e => e.stopPropagation()}>
             <div className="p-6">
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">添加子目标</h3>
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">标题 *</label>
                   <input type="text" value={childTitle} onChange={e => setChildTitle(e.target.value)}
-                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white"
+                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-2xl dark:bg-gray-700 dark:text-white"
                     autoFocus onKeyDown={e => e.key === 'Enter' && handleAddChild()} />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">描述</label>
                   <textarea value={childDescription} onChange={e => setChildDescription(e.target.value)} rows={2}
-                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white" />
+                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-2xl dark:bg-gray-700 dark:text-white" />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">优先级</label>
                   <select value={childPriority} onChange={e => setChildPriority(e.target.value as any)}
-                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white">
+                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-2xl dark:bg-gray-700 dark:text-white">
                     <option value="high">高</option>
                     <option value="medium">中</option>
                     <option value="low">低</option>
@@ -454,19 +454,19 @@ export default function GoalTreeNode({
                   <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">开始日期</label>
                     <input type="date" value={childStartDate} onChange={e => setChildStartDate(e.target.value)}
-                      className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white" />
+                      className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-2xl dark:bg-gray-700 dark:text-white" />
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">截止日期</label>
                     <input type="date" value={childTargetDate} onChange={e => setChildTargetDate(e.target.value)}
-                      className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white" />
+                      className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-2xl dark:bg-gray-700 dark:text-white" />
                   </div>
                 </div>
                 <div className="flex gap-3 pt-2">
                   <button onClick={() => setShowAddChild(false)}
-                    className="flex-1 py-2 px-4 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700">取消</button>
+                    className="flex-1 py-2 px-4 border border-gray-300 dark:border-gray-600 rounded-2xl hover:bg-gray-50 dark:hover:bg-gray-700 active:scale-[0.98] transition-all duration-200">取消</button>
                   <button onClick={handleAddChild}
-                    className="flex-1 py-2 px-4 bg-blue-500 text-white rounded-lg hover:bg-blue-600">添加</button>
+                    className="flex-1 py-2 px-4 bg-blue-500 text-white rounded-2xl hover:bg-blue-600 active:scale-[0.98] transition-all duration-200">添加</button>
                 </div>
               </div>
             </div>
@@ -477,33 +477,33 @@ export default function GoalTreeNode({
       {/* 添加任务弹窗 */}
       {showAddTask && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={() => setShowAddTask(false)}>
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-md" onClick={e => e.stopPropagation()}>
+          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl w-full max-w-md animate-fade-in" onClick={e => e.stopPropagation()}>
             <div className="p-6">
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">添加任务</h3>
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">任务标题 *</label>
                   <input type="text" value={taskTitle} onChange={e => setTaskTitle(e.target.value)}
-                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white"
+                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-2xl dark:bg-gray-700 dark:text-white"
                     autoFocus onKeyDown={e => e.key === 'Enter' && handleAddTask()} />
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">开始日期</label>
                     <input type="date" value={taskStartDate} onChange={e => setTaskStartDate(e.target.value)}
-                      className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white" />
+                      className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-2xl dark:bg-gray-700 dark:text-white" />
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">截止日期</label>
                     <input type="date" value={taskDueDate} onChange={e => setTaskDueDate(e.target.value)}
-                      className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white" />
+                      className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-2xl dark:bg-gray-700 dark:text-white" />
                   </div>
                 </div>
                 <div className="flex gap-3 pt-2">
                   <button onClick={() => setShowAddTask(false)}
-                    className="flex-1 py-2 px-4 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700">取消</button>
+                    className="flex-1 py-2 px-4 border border-gray-300 dark:border-gray-600 rounded-2xl hover:bg-gray-50 dark:hover:bg-gray-700 active:scale-[0.98] transition-all duration-200">取消</button>
                   <button onClick={handleAddTask}
-                    className="flex-1 py-2 px-4 bg-blue-500 text-white rounded-lg hover:bg-blue-600">添加</button>
+                    className="flex-1 py-2 px-4 bg-blue-500 text-white rounded-2xl hover:bg-blue-600 active:scale-[0.98] transition-all duration-200">添加</button>
                 </div>
               </div>
             </div>
@@ -514,25 +514,25 @@ export default function GoalTreeNode({
       {/* 编辑目标弹窗 */}
       {showEditGoal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={() => setShowEditGoal(false)}>
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-md" onClick={e => e.stopPropagation()}>
+          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl w-full max-w-md animate-fade-in" onClick={e => e.stopPropagation()}>
             <div className="p-6">
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">编辑目标</h3>
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">标题 *</label>
                   <input type="text" value={editTitle} onChange={e => setEditTitle(e.target.value)}
-                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white" />
+                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-2xl dark:bg-gray-700 dark:text-white" />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">描述</label>
                   <textarea value={editDescription} onChange={e => setEditDescription(e.target.value)} rows={3}
-                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white" />
+                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-2xl dark:bg-gray-700 dark:text-white" />
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">状态</label>
                     <select value={editStatus} onChange={e => setEditStatus(e.target.value as any)}
-                      className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white">
+                      className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-2xl dark:bg-gray-700 dark:text-white">
                       <option value="pending">待完成</option>
                       <option value="in_progress">进行中</option>
                       <option value="completed">已完成</option>
@@ -542,7 +542,7 @@ export default function GoalTreeNode({
                   <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">优先级</label>
                     <select value={editPriority} onChange={e => setEditPriority(e.target.value as any)}
-                      className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white">
+                      className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-2xl dark:bg-gray-700 dark:text-white">
                       <option value="high">高</option>
                       <option value="medium">中</option>
                       <option value="low">低</option>
@@ -553,19 +553,19 @@ export default function GoalTreeNode({
                   <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">开始日期</label>
                     <input type="date" value={editStartDate} onChange={e => setEditStartDate(e.target.value)}
-                      className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white" />
+                      className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-2xl dark:bg-gray-700 dark:text-white" />
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">截止日期</label>
                     <input type="date" value={editTargetDate} onChange={e => setEditTargetDate(e.target.value)}
-                      className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white" />
+                      className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-2xl dark:bg-gray-700 dark:text-white" />
                   </div>
                 </div>
                 <div className="flex gap-3 pt-2">
                   <button onClick={() => setShowEditGoal(false)}
-                    className="flex-1 py-2 px-4 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700">取消</button>
+                    className="flex-1 py-2 px-4 border border-gray-300 dark:border-gray-600 rounded-2xl hover:bg-gray-50 dark:hover:bg-gray-700 active:scale-[0.98] transition-all duration-200">取消</button>
                   <button onClick={handleEditGoal}
-                    className="flex-1 py-2 px-4 bg-blue-500 text-white rounded-lg hover:bg-blue-600">保存</button>
+                    className="flex-1 py-2 px-4 bg-blue-500 text-white rounded-2xl hover:bg-blue-600 active:scale-[0.98] transition-all duration-200">保存</button>
                 </div>
               </div>
             </div>

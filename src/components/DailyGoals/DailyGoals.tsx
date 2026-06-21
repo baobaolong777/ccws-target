@@ -104,7 +104,7 @@ export default function DailyGoals({ onComplete, onUndoComplete }: DailyGoalsPro
   if (loading) return null
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4">
+    <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm p-5">
       <div className="flex items-center gap-3 mb-4">
         <h3 className="text-lg font-semibold text-gray-900 dark:text-white whitespace-nowrap">
           🔄 每日目标
@@ -116,11 +116,11 @@ export default function DailyGoals({ onComplete, onUndoComplete }: DailyGoalsPro
             value={newTitle}
             onChange={(e) => setNewTitle(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleAdd()}
-            className="flex-1 px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white text-sm"
+            className="flex-1 px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-2xl focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white text-sm"
           />
           <button
             onClick={handleAdd}
-            className="px-3 py-1.5 bg-blue-500 text-white rounded-lg hover:bg-blue-600 text-sm"
+            className="px-3 py-1.5 bg-blue-500 text-white rounded-2xl hover:bg-blue-600 active:scale-[0.98] transition-all duration-200 text-sm animate-pulse-once"
           >
             +
           </button>
@@ -132,15 +132,17 @@ export default function DailyGoals({ onComplete, onUndoComplete }: DailyGoalsPro
 
       {/* Goal list */}
       {goals.length === 0 ? (
-        <p className="text-gray-500 text-center py-4 text-sm">
-          还没有每日目标，添加一个吧！
-        </p>
+        <div className="text-center py-8 text-gray-500">
+          <div className="text-4xl mb-3">🌟</div>
+          <p className="font-medium text-gray-700 dark:text-gray-300">今天还没有目标</p>
+          <p className="text-sm mt-1">开始新的一天吧！</p>
+        </div>
       ) : (
         <div className="space-y-2">
           {goals.map(goal => (
             <div
               key={goal.id}
-              className={`flex items-center gap-3 p-3 rounded-lg transition-colors group ${
+              className={`flex items-center gap-3 p-3 rounded-2xl transition-colors group ${
                 goal.status === 'completed'
                   ? 'bg-green-50 dark:bg-green-900/20'
                   : 'bg-gray-50 dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600'
@@ -151,14 +153,14 @@ export default function DailyGoals({ onComplete, onUndoComplete }: DailyGoalsPro
                   if (goal.status === 'completed') handleUndo(goal.id!)
                   else handleComplete(goal.id!)
                 }}
-                className={`w-5 h-5 rounded border-2 flex items-center justify-center ${
+                className={`w-5 h-5 rounded border-2 flex items-center justify-center animate-pulse-once ${
                   goal.status === 'completed'
-                    ? 'bg-green-500 border-green-500'
+                    ? 'bg-green-500 border-green-500 animate-check'
                     : 'border-gray-300 dark:border-gray-600'
                 }`}
               >
                 {goal.status === 'completed' && (
-                  <span className="text-white text-xs">✓</span>
+                  <span className="text-white text-xs animate-check">✓</span>
                 )}
               </button>
               <span className={`flex-1 ${
@@ -170,7 +172,7 @@ export default function DailyGoals({ onComplete, onUndoComplete }: DailyGoalsPro
               </span>
               <button
                 onClick={() => handleDelete(goal.id!)}
-                className="opacity-0 group-hover:opacity-100 text-red-400 hover:text-red-600 text-sm transition-opacity"
+                className="opacity-0 group-hover:opacity-100 text-red-400 hover:text-red-600 text-sm transition-opacity animate-pulse-once"
               >
                 ✕
               </button>

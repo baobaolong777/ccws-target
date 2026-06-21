@@ -70,7 +70,7 @@ function AppContent({ showNewGoal, setShowNewGoal }: { showNewGoal: boolean; set
       isHomePage ? (
         <button
           onClick={() => setShowNewGoal(true)}
-          className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors text-sm"
+          className="px-4 py-2 bg-green-500 text-white rounded-2xl hover:bg-green-600 active:scale-[0.98] transition-all duration-200 text-sm"
         >
           + 新建
         </button>

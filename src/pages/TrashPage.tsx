@@ -85,7 +85,7 @@ export default function TrashPage() {
         {deletedGoals.length > 0 && (
           <button
             onClick={handleEmptyTrash}
-            className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
+            className="px-4 py-2 bg-red-500 text-white rounded-2xl hover:bg-red-600 active:scale-[0.98] transition-all duration-200"
           >
             清空回收站
           </button>
@@ -93,16 +93,19 @@ export default function TrashPage() {
       </div>
 
       {deletedGoals.length === 0 ? (
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-12 text-center">
-          <div className="text-6xl mb-4">🗑️</div>
-          <p className="text-gray-500">回收站是空的</p>
+        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm p-12 text-center">
+          <div className="w-16 h-16 mx-auto mb-4 bg-gray-50 dark:bg-gray-700 rounded-2xl flex items-center justify-center">
+            <span className="text-3xl">🗑️</span>
+          </div>
+          <p className="font-medium text-gray-700 dark:text-gray-300">回收站是空的</p>
+          <p className="text-sm text-gray-500 mt-1">删除的目标会出现在这里</p>
         </div>
       ) : (
         <div className="space-y-3">
           {deletedGoals.map((goal) => (
             <div
               key={goal.id}
-              className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4"
+              className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm p-4"
             >
               <div className="flex items-center gap-4">
                 <div className="flex-1">
@@ -122,13 +125,13 @@ export default function TrashPage() {
                 <div className="flex gap-2">
                   <button
                     onClick={() => handleRestore(goal.id!)}
-                    className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors text-sm"
+                    className="px-4 py-2 bg-blue-500 text-white rounded-2xl hover:bg-blue-600 active:scale-[0.98] transition-all duration-200 text-sm"
                   >
                     恢复
                   </button>
                   <button
                     onClick={() => handlePermanentDelete(goal.id!)}
-                    className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors text-sm"
+                    className="px-4 py-2 bg-red-500 text-white rounded-2xl hover:bg-red-600 active:scale-[0.98] transition-all duration-200 text-sm"
                   >
                     永久删除
                   </button>
@@ -139,7 +142,7 @@ export default function TrashPage() {
         </div>
       )}
 
-      <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4">
+      <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-2xl p-4">
         <p className="text-sm text-yellow-800 dark:text-yellow-200">
           💡 提示：回收站中的目标会在30天后自动永久删除。
         </p>

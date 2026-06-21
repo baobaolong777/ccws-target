@@ -45,7 +45,7 @@ export default function Layout({ children, headerExtra }: LayoutProps) {
               {headerExtra}
               <button
                 onClick={handleLogout}
-                className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white text-sm"
+                className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white text-sm active:scale-95 transition-all duration-200"
               >
                 退出
               </button>
@@ -66,7 +66,7 @@ export default function Layout({ children, headerExtra }: LayoutProps) {
             <button
               key={item.path}
               onClick={() => navigate(item.path)}
-              className={`flex flex-col items-center py-2 px-3 ${
+              className={`flex flex-col items-center py-2 px-3 active:scale-95 transition-all duration-200 ${
                 location.pathname === item.path
                   ? 'text-blue-500'
                   : 'text-gray-600 dark:text-gray-400'
@@ -86,7 +86,7 @@ export default function Layout({ children, headerExtra }: LayoutProps) {
             <button
               key={item.path}
               onClick={() => navigate(item.path)}
-              className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
+              className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl transition-colors active:scale-[0.98] ${
                 location.pathname === item.path
                   ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-500'
                   : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'

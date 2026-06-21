@@ -44,7 +44,7 @@ export default function KeyGoalsPanel({ goals, maxCount, onComplete, onUndoCompl
   }
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4">
+    <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm p-5">
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
           ⭐ 重点目标
@@ -56,9 +56,11 @@ export default function KeyGoalsPanel({ goals, maxCount, onComplete, onUndoCompl
 
       {rootGoals.length === 0 ? (
         <div className="text-center py-8 text-gray-500">
-          <div className="text-4xl mb-2">⭐</div>
-          <p>还没有重点目标</p>
-          <p className="text-sm">在目标上点击"设为重点"</p>
+          <div className="w-16 h-16 mx-auto mb-4 bg-yellow-50 dark:bg-yellow-900/30 rounded-2xl flex items-center justify-center">
+            <span className="text-3xl">⭐</span>
+          </div>
+          <p className="font-medium text-gray-700 dark:text-gray-300">还没有重点目标</p>
+          <p className="text-sm mt-1">在目标上点击 "设为重点"</p>
         </div>
       ) : (
         <div className="space-y-2">

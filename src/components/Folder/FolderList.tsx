@@ -66,14 +66,14 @@ export default function FolderList({ folders, onRefresh, onSelectFolder, selecte
   }
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4">
+    <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm p-5">
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
           📁 文件夹
         </h3>
         <button
           onClick={() => setShowNewFolder(true)}
-          className="text-blue-500 hover:text-blue-600 text-sm"
+          className="text-blue-500 hover:text-blue-600 text-sm active:scale-[0.98] transition-all duration-200"
         >
           + 新建
         </button>
@@ -89,7 +89,7 @@ export default function FolderList({ folders, onRefresh, onSelectFolder, selecte
           {/* 全部目标选项 */}
           <div
             onClick={() => onSelectFolder(null)}
-            className={`flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-colors ${
+            className={`flex items-center gap-3 p-3 rounded-2xl cursor-pointer transition-colors ${
               selectedFolderId === null
                 ? 'bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-700'
                 : 'hover:bg-gray-50 dark:hover:bg-gray-700'
@@ -103,7 +103,7 @@ export default function FolderList({ folders, onRefresh, onSelectFolder, selecte
             <div
               key={folder.id}
               onClick={() => onSelectFolder(folder.id)}
-              className={`flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-colors group ${
+              className={`flex items-center gap-3 p-3 rounded-2xl cursor-pointer transition-colors group ${
                 selectedFolderId === folder.id
                   ? 'bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-700'
                   : 'hover:bg-gray-50 dark:hover:bg-gray-700'
@@ -129,7 +129,7 @@ export default function FolderList({ folders, onRefresh, onSelectFolder, selecte
 
       {/* 新建文件夹表单 */}
       {showNewFolder && (
-        <div className="mt-4 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+        <div className="mt-4 p-4 bg-gray-50 dark:bg-gray-700 rounded-2xl">
           <input
             type="text"
             placeholder="文件夹名称"
@@ -138,7 +138,7 @@ export default function FolderList({ folders, onRefresh, onSelectFolder, selecte
               setNewFolderName(e.target.value)
               setError('')
             }}
-            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-600 dark:text-white mb-3"
+            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-2xl focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-600 dark:text-white mb-3"
             autoFocus
             onKeyDown={(e) => e.key === 'Enter' && handleCreateFolder()}
           />
@@ -169,13 +169,13 @@ export default function FolderList({ folders, onRefresh, onSelectFolder, selecte
                 setNewFolderName('')
                 setError('')
               }}
-              className="flex-1 py-2 px-3 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors text-sm"
+              className="flex-1 py-2 px-3 border border-gray-300 dark:border-gray-600 rounded-2xl hover:bg-gray-100 dark:hover:bg-gray-600 active:scale-[0.98] transition-all duration-200 text-sm"
             >
               取消
             </button>
             <button
               onClick={handleCreateFolder}
-              className="flex-1 py-2 px-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors text-sm"
+              className="flex-1 py-2 px-3 bg-blue-500 text-white rounded-2xl hover:bg-blue-600 active:scale-[0.98] transition-all duration-200 text-sm"
             >
               创建
             </button>

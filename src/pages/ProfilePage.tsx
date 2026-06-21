@@ -84,7 +84,7 @@ export default function ProfilePage() {
       <h2 className="text-2xl font-bold text-gray-900 dark:text-white">个人中心</h2>
 
       {/* 用户信息 */}
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
+      <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm p-6">
         <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
           👤 账号信息
         </h3>
@@ -105,7 +105,7 @@ export default function ProfilePage() {
       </div>
 
       {/* 显示设置 */}
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
+      <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm p-6">
         <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
           ⚙️ 显示设置
         </h3>
@@ -180,21 +180,21 @@ export default function ProfilePage() {
       </div>
 
       {/* 数据导出 */}
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
+      <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm p-6">
         <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
           📦 数据导出
         </h3>
         <div className="space-y-3">
           <button
             onClick={handleExportJSON}
-            className="w-full py-3 px-4 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors flex items-center justify-center gap-2"
+            className="w-full py-3 px-4 bg-blue-500 text-white rounded-2xl hover:bg-blue-600 active:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-2"
           >
             <span>📄</span>
             导出为 JSON
           </button>
           <button
             onClick={handleExportCSV}
-            className="w-full py-3 px-4 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors flex items-center justify-center gap-2"
+            className="w-full py-3 px-4 bg-green-500 text-white rounded-2xl hover:bg-green-600 active:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-2"
           >
             <span>📊</span>
             导出为 CSV
@@ -206,7 +206,7 @@ export default function ProfilePage() {
       </div>
 
       {/* 关于 */}
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
+      <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm p-6">
         <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
           ℹ️ 关于
         </h3>
