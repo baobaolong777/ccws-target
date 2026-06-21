@@ -21,17 +21,17 @@ export default function CalendarPage() {
     try {
       const goalsData = await goalService.getAll()
       setGoals(goalsData)
-      // Load tasks for all goals
-      const allTasks: Task[] = []
+      // Load tasks for all goals and add goal title
+      const allTasks: (Task & { goal_title?: string })[] = []
       for (const goal of goalsData) {
         try {
           const goalTasks = await taskService.getByGoal(goal.id!)
-          allTasks.push(...goalTasks)
+          allTasks.push(...goalTasks.map(t => ({ ...t, goal_title: goal.title })))
         } catch {
           // skip tasks for goals that fail to load
         }
       }
-      setTasks(allTasks)
+      setTasks(allTasks as Task[])
     } catch (error) {
       console.error('加载数据失败:', error)
     } finally {
@@ -50,8 +50,17 @@ export default function CalendarPage() {
       if (goal.status === 'cancelled' || goal.is_deleted) return false
       const start = goal.start_date ? format(new Date(goal.start_date), 'yyyy-MM-dd') : null
       const end = goal.target_date ? format(new Date(goal.target_date), 'yyyy-MM-dd') : null
+      // 有开始和截止：显示范围内每一天
       if (start && end) return dateStr >= start && dateStr <= end
-      if (end) return dateStr === end
+      // 只有截止：显示截止当天 + 往前7天
+      if (end && !start) {
+        const endDate = new Date(goal.target_date!)
+        const weekBefore = new Date(endDate)
+        weekBefore.setDate(weekBefore.getDate() - 7)
+        const weekBeforeStr = format(weekBefore, 'yyyy-MM-dd')
+        return dateStr >= weekBeforeStr && dateStr <= end
+      }
+      // 只有开始：从开始往后显示
       if (start) return dateStr >= start
       return false
     })
@@ -215,8 +224,8 @@ export default function CalendarPage() {
 
               {selectedItems.tasks.length > 0 && (
                 <div>
-                  <h4 className="text-sm font-medium text-gray-500 mb-2">任务 ({selectedItems.tasks.length})</h4>
-                  {selectedItems.tasks.map(task => (
+                  <h4 className="text-sm font-medium text-gray-500 mb-2">📝 任务 ({selectedItems.tasks.length})</h4>
+                  {selectedItems.tasks.map((task: any) => (
                     <div
                       key={task.id}
                       className={`p-3 rounded-lg border mb-2 ${
@@ -229,11 +238,18 @@ export default function CalendarPage() {
                         <span className={task.status === 'completed' ? 'text-green-500' : 'text-gray-400'}>
                           {task.status === 'completed' ? '☑' : '☐'}
                         </span>
-                        <span className={
-                          task.status === 'completed'
-                            ? 'text-green-600 dark:text-green-400 line-through'
-                            : 'text-gray-900 dark:text-white'
-                        }>{task.title}</span>
+                        <div className="flex-1">
+                          <span className={
+                            task.status === 'completed'
+                              ? 'text-green-600 dark:text-green-400 line-through'
+                              : 'text-gray-900 dark:text-white'
+                          }>{task.title}</span>
+                          {task.goal_title && (
+                            <p className="text-xs text-gray-400 mt-0.5">
+                              🎯 {task.goal_title}
+                            </p>
+                          )}
+                        </div>
                       </div>
                     </div>
                   ))}
