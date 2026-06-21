@@ -258,7 +258,7 @@ function NewGoalModal({ folders, onSubmit, onClose }: {
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
   const [priority, setPriority] = useState<'high' | 'medium' | 'low'>('medium')
-  const [startDate, setStartDate] = useState('')
+  const [startDate, setStartDate] = useState(new Date().toISOString().split('T')[0])
   const [targetDate, setTargetDate] = useState('')
   const [folderId, setFolderId] = useState<string | null>(null)
   const [isKeyGoal, setIsKeyGoal] = useState(false)
